@@ -1,3 +1,4 @@
+import { validationResult } from "express-validator";
 import { books } from "../models/books.js";
 
 function list(req, res) {
@@ -12,7 +13,7 @@ function get(req, res) {
 
 function create(req, res) {
   const body = req.body;
-  
+
   const book = {
     id: books.length + 1,
     ...body,
