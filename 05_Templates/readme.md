@@ -262,6 +262,19 @@ app.post("/create", (req, res) => {
 }
 ```
 
+Если мы хотим вернуть массив значений (например, при использовании нескольких чекбоксов с одинаковым именем), нужно указать имя с квадратными скобками, например `name="hobbies[]"`. Тогда в `req.body.hobbies` будет массив выбранных значений.
+
+```html
+<form action="/create" method="POST">
+  <input type="checkbox" name="hobbies[]" value="reading"> Reading
+  <input type="checkbox" name="hobbies[]" value="traveling"> Traveling
+  <input type="checkbox" name="hobbies[]" value="gaming"> Gaming
+  <button type="submit">Submit</button>
+</form>
+```
+
+В этом случае, если пользователь выберет "Reading" и "Gaming", то на сервере в `req.body.hobbies` будет массив: `["reading", "gaming"]`.
+
 ### Получение данных в формате JSON
 
 Помимо форм, данные на сервер могут отправляться и в виде *JSON* – популярного текстового формата обмена данными (JavaScript Object Notation). *JSON* представляет из себя структуру ключ-значение, похожую на объекты JavaScript или словари Python. Например, JSON-документ может выглядеть так:
@@ -320,13 +333,13 @@ app.post("/api/data", (req, res) => {
 
 ```
 
-Пример. Если клиент отправит JSON:
+
+
 
 ```json
 {
   "fullName": "John Doe",
-  "email": "
-  "
+  "email": "john@example.com"
 }
 ```
 
