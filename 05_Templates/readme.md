@@ -241,6 +241,29 @@ app.post("/create", (req, res) => {
 
 В данном примере при отправке формы на `/create` сервер получит данные, извлечет значение поля `fullName` из `req.body` и отправит сообщение с этим именем в ответ.
 
+Чтобы получить данные из разных типов полей формы, нужно использовать атрибут `name` в элементах ввода. Например:
+
+```html
+<form action="/create" method="POST">
+  <input type="text" name="fullName" placeholder="Full Name">
+  <input type="email" name="email" placeholder="Email">
+  <button type="submit">Submit</button>
+</form>
+```
+
+В этом случае в `req.body` будут доступны свойства `fullName` и `email`, соответствующие введённым значениям.
+
+Чтобы получить массив значений (например, из нескольких чекбоксов с одинаковым именем), нужно использовать атрибут `name` с квадратными скобками, например: `name="hobbies[]"`. Тогда в `req.body.hobbies` будет массив выбранных значений.
+
+```html
+<form action="/create" method="POST">
+  <label><input type="checkbox" name="hobbies[]" value="reading"> Reading</label>
+  <label><input type="checkbox" name="hobbies[]" value="traveling"> Traveling</label>
+  <label><input type="checkbox" name="hobbies[]" value="gaming"> Gaming</label>
+  <button type="submit">Submit</button>
+</form>
+```
+
 ### Получение данных в формате JSON
 
 Помимо форм, данные на сервер могут отправляться и в виде *JSON* – популярного текстового формата обмена данными (JavaScript Object Notation). *JSON* представляет из себя структуру ключ-значение, похожую на объекты JavaScript или словари Python. Например, JSON-документ может выглядеть так:
