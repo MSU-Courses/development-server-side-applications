@@ -247,19 +247,7 @@ app.post("/create", (req, res) => {
 <form action="/create" method="POST">
   <input type="text" name="fullName" placeholder="Full Name">
   <input type="email" name="email" placeholder="Email">
-  <button type="submit">Submit</button>
-</form>
-```
-
-В этом случае в `req.body` будут доступны свойства `fullName` и `email`, соответствующие введённым значениям.
-
-Чтобы получить массив значений (например, из нескольких чекбоксов с одинаковым именем), нужно использовать атрибут `name` с квадратными скобками, например: `name="hobbies[]"`. Тогда в `req.body.hobbies` будет массив выбранных значений.
-
-```html
-<form action="/create" method="POST">
-  <label><input type="checkbox" name="hobbies[]" value="reading"> Reading</label>
-  <label><input type="checkbox" name="hobbies[]" value="traveling"> Traveling</label>
-  <label><input type="checkbox" name="hobbies[]" value="gaming"> Gaming</label>
+  <input type="checkbox" name="subscribe">
   <button type="submit">Submit</button>
 </form>
 ```
