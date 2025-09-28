@@ -247,9 +247,19 @@ app.post("/create", (req, res) => {
 <form action="/create" method="POST">
   <input type="text" name="fullName" placeholder="Full Name">
   <input type="email" name="email" placeholder="Email">
-  <input type="checkbox" name="subscribe">
+  <input type="relation  checkbox" name="subscribe" value="yes"> your email
   <button type="submit">Submit</button>
 </form>
+```
+
+Объект `req.body` на сервере будет выглядеть так:
+
+```json
+{
+  "fullName": "John Doe",
+  "email": "
+  "subscribe": "yes" // если чекбокс отмечен, иначе поле отсутствует
+}
 ```
 
 ### Получение данных в формате JSON
