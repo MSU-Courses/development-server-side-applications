@@ -207,18 +207,19 @@ _Пример использования частичного шаблона_:
 ```html
 <form action="/create" method="POST">
   <label for="fullName">Full Name:</label>
-  <input placeholder="John Doe" type="text" name="fullName" id="fullName">
+  <input placeholder="John Doe" type="text" name="fullName" id="fullName" />
   <button type="submit">Submit</button>
 </form>
 ```
 
 Данные с формы отправлются на сервер в формате:
+
 - URL-кодирования (application/x-www-form-urlencoded)
 - multipart/form-data (для файлов).
 
 Пример выше отправит POST-запрос на маршрут `/create` с полем `fullName`. В теле запроса будет строка `fullName=John+Doe`.
 
-Для обработки данных, отправленных с формы, в Express-приложении нужно использовать *middleware для парсинга тела запроса*.
+Для обработки данных, отправленных с формы, в Express-приложении нужно использовать _middleware для парсинга тела запроса_.
 
 ```javascript
 import express from "express";
@@ -232,10 +233,10 @@ app.use(express.urlencoded({ extended: true })); // Для парсинга appl
 
 ```javascript
 app.post("/create", (req, res) => {
-    // извлекаем поле "fullName" из данных формы
-    const fullName = req.body.fullName; 
-    //  Далее можно, например, сохранить это имя или использовать по логике...
-    res.send(`User created: ${fullName}`);
+  // извлекаем поле "fullName" из данных формы
+  const fullName = req.body.fullName;
+  //  Далее можно, например, сохранить это имя или использовать по логике...
+  res.send(`User created: ${fullName}`);
 });
 ```
 
@@ -245,9 +246,10 @@ app.post("/create", (req, res) => {
 
 ```html
 <form action="/create" method="POST">
-  <input type="text" name="fullName" placeholder="Full Name">
-  <input type="email" name="email" placeholder="Email">
-  <input type="checkbox" name="subscribe" value="yes"> Yes, I want to subscribe
+  <input type="text" name="fullName" placeholder="Full Name" />
+  <input type="email" name="email" placeholder="Email" />
+  <input type="checkbox" name="subscribe" value="yes" /> Yes, I want to
+  subscribe
   <button type="submit">Submit</button>
 </form>
 ```
@@ -258,7 +260,7 @@ app.post("/create", (req, res) => {
 {
   "fullName": "John Doe",
   "email": "john@example.com",
-  "subscribe": "yes",
+  "subscribe": "yes"
 }
 ```
 
@@ -266,9 +268,9 @@ app.post("/create", (req, res) => {
 
 ```html
 <form action="/create" method="POST">
-  <input type="checkbox" name="hobbies[]" value="reading"> Reading
-  <input type="checkbox" name="hobbies[]" value="traveling"> Traveling
-  <input type="checkbox" name="hobbies[]" value="gaming"> Gaming
+  <input type="checkbox" name="hobbies[]" value="reading" /> Reading
+  <input type="checkbox" name="hobbies[]" value="traveling" /> Traveling
+  <input type="checkbox" name="hobbies[]" value="gaming" /> Gaming
   <button type="submit">Submit</button>
 </form>
 ```
@@ -277,14 +279,7 @@ app.post("/create", (req, res) => {
 
 ### Обработка данных в формате JSON
 
-Помимо форм, данные на сервер могут отправляться и в виде *JSON*. Например, JSON-документ может выглядеть следующим образом:
-
-```json
-{
-  "fullName": "John Doe",
-  "age": 25
-}
-```
+При разработке серверной части приложения вы, как бэкенд-разработчик, не будете напрямую работать с HTML-формами. Вместо этого основным способом обмена данными между клиентом и сервером является REST API, где данные передаются в формате JSON и ваша задача как будет принимать эти данные, валидировать, обрабатывать бизнес-логику и возвращать ответ также в формате JSON.
 
 Чтобы приложение Express могло корректно принимать и обрабатывать JSON-данные, нужно подключить соответствующий middleware для парсинга JSON тела запроса. Это делается с помощью встроенного метода `express.json()`. Необходимо добавить следующую строку в конфигурацию вашего Express-приложения:
 
@@ -292,21 +287,33 @@ app.post("/create", (req, res) => {
 app.use(express.json());
 ```
 
-Эта строчка включает middleware, который будет ловить все входящие запросы с `Content-Type: application/json` и *автоматически парсить тело как JSON*, превращая его в объект JavaScript, доступный через `req.body`.
+Эта строчка включает middleware, который будет ловить все входящие запросы с `Content-Type: application/json` и _автоматически парсить тело как JSON_, превращая его в объект JavaScript, доступный через `req.body`.
 
 После этого в обработчиках маршрутов можно будет получать данные из `req.body` в виде объекта. Например:
 
 ```javascript
 app.post("/create", (req, res) => {
-    const fullName = req.body.fullName; // Извлекаем поле fullName из JSON
-    const age = req.body.age;           // Извлекаем поле age из JSON
-    res.send(`User created: ${fullName}, Age: ${age}`);
+  const fullName = req.body.fullName; // Извлекаем поле fullName из JSON
+  const age = req.body.age; // Извлекаем поле age из JSON
+  res.send(`User created: ${fullName}, Age: ${age}`);
 });
 ```
 
 Эти поля `fullName` и `email` стали свойствами объекта req.body благодаря работе `express.json()`
 
-Получение данных *в формате JSON не отличается от получения данных*. В обоих случаях данные попадают в `req.body`, но формат и способ отправки отличаются. 
+Получение данных _в формате JSON не отличается от получения данных с помощью HTML-форм_. В обоих случаях данные попадают в `req.body`, но формат и способ отправки отличаются.
+
+Чтобы вернуть ответ в формате JSON, можно использовать метод `res.json()`, который автоматически сериализует объект в JSON и устанавливает правильный заголовок `Content-Type`. Например:
+
+````javascript
+app.post("/create", (req, res) => {
+    const fullName = req.body.fullName;
+    const age = req.body.age;
+    // Логика обработки данных (например, сохранение в базе)
+    // Возвращаем ответ в формате JSON
+    res.json({ message: "User created", user: { fullName, age } });
+});
+```
 
 ### Переадресация после обработки формы
 
@@ -319,7 +326,7 @@ app.post("/create", (req, res) => {
     // После обработки перенаправляем пользователя на главную страницу
     res.redirect("/"); // Перенаправление на корневой маршрут
 });
-```
+````
 
 В этом примере после обработки POST-запроса на `/create` сервер отправит клиенту ответ с кодом 302 (Found) и заголовком `Location: /`, что заставит браузер перейти на главную страницу. Ниже приведён полный пример получения данных.
 
