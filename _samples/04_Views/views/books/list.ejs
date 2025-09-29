@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Books</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Arial, sans-serif;
+        background: linear-gradient(120deg, #f8fafc 0%, #e0e7ff 100%);
+        margin: 0;
+        padding: 40px;
+      }
+      .book-list {
+        max-width: 600px;
+        margin: 0 auto;
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 4px 24px rgba(60, 72, 88, 0.12);
+        padding: 32px;
+      }
+      .book {
+        border-bottom: 1px solid #e5e7eb;
+        padding: 20px 0;
+      }
+      .book:last-child {
+        border-bottom: none;
+      }
+      h2 {
+        margin: 0 0 8px 0;
+        color: #3730a3;
+        font-size: 1.5rem;
+      }
+      p {
+        margin: 0;
+        color: #64748b;
+        font-size: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="book-list">
+      <% books.forEach(b => { %>
+      <div class="book">
+        <a href="/book/<%= b.id %>"><h2><%= b.title %></h2></a>
+        <p><%= b.author %></p>
+      </div>
+      <% }) %>
+    </div>
+  </body>
+</html>

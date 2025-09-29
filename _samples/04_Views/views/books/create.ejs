@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Book Create</title>
+    <style>
+      body {
+        background: #f6f8fa;
+        font-family: "Segoe UI", Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+      }
+      form {
+        background: #fff;
+        padding: 2rem 2.5rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+        width: 100%;
+        max-width: 400px;
+      }
+      form div {
+        margin-bottom: 1.5rem;
+      }
+      label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: #333;
+      }
+      input[type="text"],
+      input[type="number"] {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        font-size: 1rem;
+        background: #f9fafb;
+        transition: border-color 0.2s;
+      }
+      input:focus {
+        border-color: #2563eb;
+        outline: none;
+        background: #fff;
+      }
+      button {
+        width: 100%;
+        padding: 0.75rem;
+        background: linear-gradient(90deg, #2563eb 0%, #1e40af 100%);
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+      button:hover {
+        background: linear-gradient(90deg, #1e40af 0%, #2563eb 100%);
+      }
+    </style>
+  </head>
+  <body>
+    <form action="/book" method="POST">
+      <div>
+        <label for="title">Title:</label>
+        <input type="text" id="title" name="title" required />
+      </div>
+      <div>
+        <label for="author">Author:</label>
+        <input type="text" id="author" name="author" required />
+      </div>
+      <div>
+        <label for="year">Year:</label>
+        <input type="number" id="year" name="year" required />
+      </div>
+      <button type="submit">Create Book</button>
+    </form>
+  </body>
+</html>

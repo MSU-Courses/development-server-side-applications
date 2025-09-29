@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Book</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Arial, sans-serif;
+        background: linear-gradient(120deg, #f8fafc 0%, #e0e7ff 100%);
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .book-card {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 6px 24px rgba(60, 72, 88, 0.12);
+        padding: 2.5rem 2rem;
+        max-width: 400px;
+        width: 100%;
+        text-align: center;
+      }
+      .book-card h1 {
+        font-size: 2.2rem;
+        margin-bottom: 0.5rem;
+        color: #3b82f6;
+        font-weight: 700;
+      }
+      .book-card h3 {
+        font-size: 1.2rem;
+        margin-bottom: 1.2rem;
+        color: #6366f1;
+        font-weight: 500;
+      }
+      .book-card p {
+        font-size: 1rem;
+        color: #64748b;
+        margin-bottom: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="book-card">
+      <h1><%= book.title %></h1>
+      <h3>by <%= book.author %></h3>
+      <p>Published in <%= book.year %></p>
+      <p><a href="/book"> <- back to book list</a></p>
+    </div>
+  </body>
+</html>
