@@ -247,7 +247,7 @@ app.post("/create", (req, res) => {
 <form action="/create" method="POST">
   <input type="text" name="fullName" placeholder="Full Name">
   <input type="email" name="email" placeholder="Email">
-  <input type="relation  checkbox" name="subscribe" value="yes"> your email
+  <input type="checkbox" name="subscribe" value="yes"> Yes, I want to subscribe
   <button type="submit">Submit</button>
 </form>
 ```
@@ -257,12 +257,12 @@ app.post("/create", (req, res) => {
 ```json
 {
   "fullName": "John Doe",
-  "email": "
-  "subscribe": "yes" // если чекбокс отмечен, иначе поле отсутствует
+  "email": "john@example.com",
+  "subscribe": "yes",
 }
 ```
 
-Если мы хотим вернуть массив значений (например, при использовании нескольких чекбоксов с одинаковым именем), нужно указать имя с квадратными скобками, например `name="hobbies[]"`. Тогда в `req.body.hobbies` будет массив выбранных значений.
+Если мы хотим отправить массив значений (например, при использовании нескольких чекбоксов с одинаковым именем), нужно указать имя с квадратными скобками, например `name="hobbies[]"`. Тогда в `req.body.hobbies` будет массив выбранных значений.
 
 ```html
 <form action="/create" method="POST">
@@ -273,11 +273,11 @@ app.post("/create", (req, res) => {
 </form>
 ```
 
-В этом случае, если пользователь выберет "Reading" и "Gaming", то на сервере в `req.body.hobbies` будет массив: `["reading", "gaming"]`.
+В примере выше, если пользователь выберет "Reading" и "Gaming", то на сервере в `req.body.hobbies` будет массив: `["reading", "gaming"]`.
 
 ### Получение данных в формате JSON
 
-Помимо форм, данные на сервер могут отправляться и в виде *JSON* – популярного текстового формата обмена данными (JavaScript Object Notation). *JSON* представляет из себя структуру ключ-значение, похожую на объекты JavaScript или словари Python. Например, JSON-документ может выглядеть так:
+Помимо форм, данные на сервер могут отправляться и в виде *JSON*. Например, JSON-документ может выглядеть следующим образом:
 
 ```json
 {
@@ -286,13 +286,13 @@ app.post("/create", (req, res) => {
 }
 ```
 
-Чтобы приложение *начало принимать JSON*, достаточно добавить в настройку:
+Чтобы приложение Express могло корректно принимать и обрабатывать JSON-данные, нужно подключить соответствующий middleware для парсинга JSON тела запроса. Это делается с помощью встроенного метода `express.json()`. Необходимо добавить следующую строку в конфигурацию вашего Express-приложения:
 
 ```js
 app.use(express.json());
 ```
 
-Эта строчка включает middleware, который будет ловить все входящие запросы с `Content-Type: application/json` и *автоматически парсить тело как JSON*.
+Эта строчка включает middleware, который будет ловить все входящие запросы с `Content-Type: application/json` и *автоматически парсить тело как JSON*, превращая его в объект JavaScript, доступный через `req.body`.
 
 После этого в обработчиках маршрутов можно будет получать данные из `req.body` в виде объекта. Например:
 
@@ -322,28 +322,6 @@ app.post("/create", (req, res) => {
 ```
 
 В этом примере после обработки POST-запроса на `/create` сервер отправит клиенту ответ с кодом 302 (Found) и заголовком `Location: /`, что заставит браузер перейти на главную страницу. Ниже приведён полный пример получения данных.
-
-```javascript
-app.post("/api/data", (req, res) => {
-  const data = req.body;  // объект, полученный из JSON
-  console.log("Получен JSON:", data);
-  // например, data.fullName и data.email доступны
-  res.status(200).send("OK");
-  });
-
-```
-
-
-
-
-```json
-{
-  "fullName": "John Doe",
-  "email": "john@example.com"
-}
-```
-
-> Эти поля *fullName* и *email* стали свойствами объекта *req.body* благодаря работе `express.json()`. С ними можно далее работать: *сохранять в базу, проводить вычисления, формировать ответ и т.д*.
 
 [^1]: _Using template engines with Express_. expressjs [online]. Available at: https://expressjs.com/en/guide/using-template-engines.html
 [^2]: _Views_. theodinproject.com [online]. Available at: https://www.theodinproject.com/lessons/nodejs-views
