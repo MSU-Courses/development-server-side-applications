@@ -245,7 +245,7 @@ app.post("/create", (req, res) => {
 Чтобы получить данные из разных типов полей формы, нужно использовать атрибут `name` в элементах ввода. Например:
 
 ```html
-<form action="/create" method="POST">
+<form action="/user" method="POST">
   <input type="text" name="fullName" placeholder="Full Name" />
   <input type="email" name="email" placeholder="Email" />
   <input type="checkbox" name="subscribe" value="yes" /> Yes, I want to
@@ -267,7 +267,7 @@ app.post("/create", (req, res) => {
 Если мы хотим отправить массив значений (например, при использовании нескольких чекбоксов с одинаковым именем), нужно указать имя с квадратными скобками, например `name="hobbies[]"`. Тогда в `req.body.hobbies` будет массив выбранных значений.
 
 ```html
-<form action="/create" method="POST">
+<form action="/user" method="POST">
   <input type="checkbox" name="hobbies[]" value="reading" /> Reading
   <input type="checkbox" name="hobbies[]" value="traveling" /> Traveling
   <input type="checkbox" name="hobbies[]" value="gaming" /> Gaming
@@ -292,7 +292,7 @@ app.use(express.json());
 После этого в обработчиках маршрутов можно будет получать данные из `req.body` в виде объекта. Например:
 
 ```javascript
-app.post("/create", (req, res) => {
+app.post("/user", (req, res) => {
   const fullName = req.body.fullName; // Извлекаем поле fullName из JSON
   const age = req.body.age; // Извлекаем поле age из JSON
   res.send(`User created: ${fullName}, Age: ${age}`);
@@ -315,7 +315,7 @@ app.post("/create", (req, res) => {
 То в обработчике можно следующим образом вернуть ответ:
 
 ````javascript
-app.post("/create", (req, res) => {
+app.post("/user", (req, res) => {
     const fullName = req.body.fullName;
     const age = req.body.age;
     // Логика обработки данных (например, сохранение в базе)
