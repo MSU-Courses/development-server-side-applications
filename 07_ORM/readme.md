@@ -546,11 +546,15 @@ SELECT * FROM "Posts" WHERE "userId" IN (1, 2, ..., 10); -- 1 запрос на 
 
 Это значительно уменьшает количество запросов и повышает производительность.
 
+Подробнее о Sequelize и его возможностях можно узнать в официальной документации: https://sequelize.org/docs/v6/getting-started/ [^4]
+
 ## Немного о Prisma ORM
 
 Напоследок отметим, что помимо Sequelize существует и другая популярная ORM – _Prisma_. _Prisma_ предлагает более современный подход: вы описываете модель данных в специальном schema-файле, а ORM генерирует на основе него типизированный клиент для базы. В то время как Sequelize представляет классический ORM (таблицы соответствуют классам моделей, объекты моделей предоставляют методы для CRUD во время выполнения), Prisma фокусируется на типобезопасности и генерации кода.
 
 Prisma пытается решить некоторые проблемы традиционных ORM, такие как избыточность моделей, смешивание логики хранения с бизнес-логикой, отсутствие статической типизации и т.д.
+
+Подробнее о Prisma можно узнать в официальной документации: https://prisma.io/docs/
 
 [^1]: _What is an ORM – The Meaning of Object Relational Mapping Database Tools_. freeCodeCamp [online]. Avaiable at: https://www.freecodecamp.org/news/what-is-an-orm-the-meaning-of-object-relational-mapping-database-tools/
 [^2]: _Object-Relational Mapping Explained: Benefits, Drawbacks & Tools_. cdata.com [online]. Available at: https://www.cdata.com/blog/object-relational-mapping
