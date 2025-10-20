@@ -297,9 +297,9 @@ _OAuth 2.0_ — это открытый стандарт, позволяющий
 | _Authorization Server_ | Сервис авторизации (Google, Facebook) |
 | _Resource Server_      | API, где хранятся данные пользователя |
 
-![Рисунок 4. SSO и OAuth 2.0](../_images/08/04_sso_auth.png)
+![Рисунок 4. Пример SSO и OAuth 2.0, с использованием Google](../_images/08/04_sso_auth.png)
 
-_Рисунок 4. SSO и OAuth 2.0_
+_Рисунок 4. Пример SSO и OAuth 2.0, с использованием Google_
 
 ### Заключение
 
