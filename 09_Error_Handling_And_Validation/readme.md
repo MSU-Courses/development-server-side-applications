@@ -786,3 +786,97 @@ src/
 │   └── logger.js           # Конфигурация логирования
 └── app.js               # Главный файл приложения
 ```
+
+## Дополнительно. Расширенная архитектура обработки ошибок
+
+Для больших приложений может быть полезна более сложная архитектура обработки ошибок, когда ошибки расширяются и используются с дополнительной контекстной информацией.
+
+### Паттерн с регистром обработчиков
+
+_Паттерн с регистром обработчиков_ позволяет централизованно управлять обработкой различных типов ошибок. Идея заключается в создании реестра (регистра) обработчиков ошибок, где каждый тип ошибки ассоциируется с определённой функцией обработки.
+
+```js
+// errors/Handler.js
+class ErrorHandler {
+  constructor() {
+    this.handlers = new Map();
+  }
+
+  // Регистрируем обработчик для определенного типа ошибки
+  register(ErrorClass, handler) {
+    this.handlers.set(ErrorClass, handler);
+  }
+
+  // Находим подходящий обработчик и применяем его
+  handle(error, req, res) {
+    for (const [ErrorClass, handler] of this.handlers) {
+      if (error instanceof ErrorClass) {
+        return handler(error, req, res);
+      }
+    }
+
+    // Обработчик по умолчанию
+    return res.status(500).json({ message: 'Internal Server Error' });
+  }
+}
+
+export default new ErrorHandler();
+```
+
+```js
+// errors/errorHandlers.js
+import ErrorHandler from './Handler.js';
+import { BookNotFoundError, ValidationError } from './index.js';
+
+// Регистрируем обработчики
+ErrorHandler.register(BookNotFoundError, (error, req, res) => {
+  return res.status(404).json({
+    status: 'not_found',
+    message: error.message,
+  });
+});
+
+ErrorHandler.register(ValidationError, (error, req, res) => {
+  return res.status(400).json({
+    status: 'validation_error',
+    message: error.message,
+    errors: error.errors,
+  });
+});
+
+ErrorHandler.register(AppError, (error, req, res) => {
+  return res.status(error.statusCode).json({
+    status: 'error',
+    message: error.message,
+  });
+});
+
+// Обработчик по умолчанию для всех остальных ошибок
+ErrorHandler.register(Error, (error, req, res) => {
+  console.error('Unexpected error:', error);
+  // Здесь можно добавить дополнительную логику, например, отправку уведомлений в Sentry
+  return res.status(500).json({
+    message: 'Something went wrong',
+  });
+});
+
+export { ErrorHandler };
+```
+
+```js
+// middlewares/errorHandler.js
+import ErrorHandler from '../errors/errorHandlers.js';
+
+const errorHandlingMiddleware = (err, req, res, next) => {
+  ErrorHandler.handle(err, req, res);
+};
+
+export default errorHandlingMiddleware;
+```
+
+_Этот подход позволяет_:
+
+-Централизованно определять, как обрабатывать разные типы ошибок
+-Легко добавлять новые типы ошибок и их обработчики
+-Переиспользовать логику обработки в разных частях приложения
+-Тестировать обработчики отдельно
