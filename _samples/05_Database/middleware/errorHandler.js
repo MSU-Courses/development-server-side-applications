@@ -1,4 +1,5 @@
 import ValidationError from "../errors/validationError.js";
+import logger, { logtail } from "../utils/logger.js";
 
 const errorHandler = (err, req, res, next) => {
   const statusCode = err.statusCode || 500;
@@ -12,6 +13,10 @@ const errorHandler = (err, req, res, next) => {
 
   if (err instanceof ValidationError) {
     response.errors = err.errors;
+  }
+
+  if (isDev) {
+    logger.error(err);
   }
 
   return res.status(statusCode).json(response);
