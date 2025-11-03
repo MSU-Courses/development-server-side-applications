@@ -10,6 +10,28 @@
 
 В этой лекции мы разберемся, как правильно работать с этими компонентами в Node.js.
 
+## Ошибки и исключения в Node.js
+
+В JavaScript и Node.js все исключительные ситуации выражаются через объекты класса `Error`.
+
+В отличие от языков вроде Java или C#, где есть отдельные типы `Exception`, в Node.js все ошибки — это объекты Error или его наследников (`TypeError`, `ReferenceError`, `SyntaxError` и т.д.).
+
+_Исключение (exception)_ — это событие, которое возникает при выполнении кода, когда происходит ошибка.
+
+Когда движок JavaScript встречает проблемную ситуацию, он создаёт объект `Error` и выбрасывает его с помощью оператора throw. Если исключение не перехвачено, процесс завершается с ошибкой.
+
+Пример:
+
+```js
+try {
+  throw new Error("Something went wrong");
+} catch (err) {
+  console.error(err.message);
+}
+```
+
+Таким образом, термин _«исключение»_ (exception) описывает сам факт возникновения ошибки, а `Error` — это объект, который хранит информацию об этой ошибке.
+
 ## Типы ошибок
 
 В Node.js приложениях различают два основных типа ошибок: _операционные ошибки (operational errors)_ и _ошибки программиста (programmer errors)_. Это разделение критично для правильной обработки исключительных ситуаций.
@@ -51,7 +73,7 @@ async function getUser(req, res) {
     const user = await User.findById(userId);
     // ... какой-то код
   } catch (error) {
-    res.status(500).json({ message: 'Something went wrong' });
+    res.status(500).json({ message: "Something went wrong" });
   }
 }
 ```
@@ -90,7 +112,7 @@ class AppError extends Error {
 function getUserById(userId) {
   const user = database.findUserById(userId);
   if (!user) {
-    throw new AppError('User not found', 404);
+    throw new AppError("User not found", 404);
   }
   return user;
 }
@@ -105,10 +127,10 @@ _Специализированные ошибки_ - это классы, ко�
 ```js
 // errors/NotFoundError.js
 
-import { AppError } from './AppError.js';
+import { AppError } from "./AppError.js";
 
 class NotFoundError extends AppError {
-  constructor(message = 'Resource not found') {
+  constructor(message = "Resource not found") {
     super(message, 404);
   }
 }
@@ -119,7 +141,7 @@ class NotFoundError extends AppError {
 ```js
 // errors/UserNotFoundError.js
 
-import { NotFoundError } from './NotFoundError.js';
+import { NotFoundError } from "./NotFoundError.js";
 
 class UserNotFoundError extends NotFoundError {
   constructor(userId) {
@@ -135,26 +157,26 @@ export { UserNotFoundError };
 ```js
 // errors/ValidationError.js
 export default class ValidationError extends AppError {
-  constructor(message = 'Validation failed', errors = []) {
+  constructor(message = "Validation failed", errors = []) {
     super(message, 400, true); // 400 - стандартный HTTP-код для ошибок валидации
-    this.name = 'ValidationError'; // имя ошибки
+    this.name = "ValidationError"; // имя ошибки
     this.errors = errors; // массив объектов с деталями: { field, message }
   }
 }
 
 // errors/AuthenticationError.js
 class AuthenticationError extends AppError {
-  constructor(message = 'Authentication failed') {
+  constructor(message = "Authentication failed") {
     super(message, 401);
-    this.name = 'AuthenticationError';
+    this.name = "AuthenticationError";
   }
 }
 
 // errors/NotFoundError.js
 class NotFoundError extends AppError {
-  constructor(resource = 'Resource') {
+  constructor(resource = "Resource") {
     super(`${resource} not found`, 404);
-    this.name = 'NotFoundError';
+    this.name = "NotFoundError";
   }
 }
 ```
@@ -162,7 +184,7 @@ class NotFoundError extends AppError {
 Код становится более выразительным и легче поддерживаемым.
 
 ```js
-import { ValidationError, NotFoundError, AuthenticationError } from './errors';
+import { ValidationError, NotFoundError, AuthenticationError } from "./errors";
 
 // В контроллере
 async function createUser(req, res, next) {
@@ -170,12 +192,12 @@ async function createUser(req, res, next) {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      throw new ValidationError('Email and password are required', 'email');
+      throw new ValidationError("Email and password are required", "email");
     }
 
     const existingUser = await User.findByEmail(email);
     if (existingUser) {
-      throw new ValidationError('Email already registered', 'email');
+      throw new ValidationError("Email already registered", "email");
     }
 
     const user = await User.create({ email, password });
@@ -201,13 +223,13 @@ _Глобальный обработчик ошибок (error handler middlewar
 ```js
 // middlewares/errorHandler.js
 const errorHandler = (err, req, res, next) => {
-  const isDev = process.env.NODE_ENV === 'development';
+  const isDev = process.env.NODE_ENV === "development";
   const statusCode = err.statusCode || 500;
 
   // Базовая структура ответа
   const response = {
-    status: 'error',
-    message: err.message || 'Unexpected error occurred',
+    status: "error",
+    message: err.message || "Unexpected error occurred",
   };
 
   // Добавляем детали валидации, если они есть
@@ -235,18 +257,18 @@ export default errorHandler;
 Глобальный обработчик ошибок должен быть зарегистрирован после всех маршрутов, чтобы он мог перехватывать ошибки, возникающие в них.
 
 ```js
-import express from 'express';
-import errorHandler from './middlewares/errorHandler.js';
+import express from "express";
+import errorHandler from "./middlewares/errorHandler.js";
 
 const app = express();
 
 // Регистрация маршрутов
-app.use('/api/users', userRoutes);
-app.use('/api/todos', todoRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/todos", todoRoutes);
 
 // Маршрут для несуществующих адресов
 app.use((req, res, next) => {
-  const error = new AppError('Route not found', 404);
+  const error = new AppError("Route not found", 404);
   next(error);
 });
 
@@ -254,7 +276,7 @@ app.use((req, res, next) => {
 app.use(errorHandler);
 
 app.listen(3000, () => {
-  console.log('Server is running on port 3000');
+  console.log("Server is running on port 3000");
 });
 ```
 
@@ -267,7 +289,7 @@ app.listen(3000, () => {
 _Пример, когда ошибка не будет поймана:_
 
 ```js
-app.get('/api/users/:id', async (req, res) => {
+app.get("/api/users/:id", async (req, res) => {
   const user = await User.findById(req.params.id);
   // Если здесь произойдёт ошибка, например при сбое соединения с БД,
   // она не будет автоматически передана в обработчик ошибок.
@@ -288,24 +310,24 @@ export default asyncWrapper;
 
 ```js
 // Пример использования обёртки
-import asyncWrapper from './middlewares/asyncWrapper.js';
+import asyncWrapper from "./middlewares/asyncWrapper.js";
 
 app.get(
-  '/api/users/:id',
+  "/api/users/:id",
   asyncWrapper(async (req, res) => {
     const user = await User.findById(req.params.id);
     res.json(user);
-  }),
+  })
 );
 
 // или, если используется контроллер
-app.get('/api/users/:id', asyncWrapper(userController.getUserById));
+app.get("/api/users/:id", asyncWrapper(userController.getUserById));
 
 // Регистрация глобального обработчика ошибок
 app.use(errorHandler);
 
 app.listen(3000, () => {
-  console.log('Server is running on port 3000');
+  console.log("Server is running on port 3000");
 });
 ```
 
@@ -320,15 +342,15 @@ _Валидация_ - это процесс проверки, соответс�
 Самый простой способ - проверять данные вручную в коде:
 
 ```js
-app.post('/register', (req, res, next) => {
+app.post("/register", (req, res, next) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    throw new ValidationError('Email and password are required', 'email');
+    throw new ValidationError("Email and password are required", "email");
   }
 
   if (!isValidEmail(email)) {
-    throw new ValidationError('Invalid email format', 'email');
+    throw new ValidationError("Invalid email format", "email");
   }
 
   // Продолжение регистрации...
@@ -388,14 +410,14 @@ npm install express-validator
 _Использование_:
 
 ```js
-import { body, validationResult } from 'express-validator';
+import { body, validationResult } from "express-validator";
 
 // Middleware для обработки ошибок валидации
 const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({
-      message: 'Validation failed',
+      message: "Validation failed",
       errors: errors.array(),
     });
   }
@@ -403,30 +425,34 @@ const handleValidationErrors = (req, res, next) => {
 };
 
 app.post(
-  '/register',
+  "/register",
   [
     // Правила валидации
-    body('name')
+    body("name")
       .trim()
       .notEmpty()
-      .withMessage('Name is required')
+      .withMessage("Name is required")
       .isLength({ min: 2 })
-      .withMessage('Name must be at least 2 characters'),
+      .withMessage("Name must be at least 2 characters"),
 
-    body('email').trim().isEmail().withMessage('Invalid email format').normalizeEmail(),
+    body("email")
+      .trim()
+      .isEmail()
+      .withMessage("Invalid email format")
+      .normalizeEmail(),
 
-    body('password')
+    body("password")
       .isLength({ min: 8 })
-      .withMessage('Password must be at least 8 characters')
+      .withMessage("Password must be at least 8 characters")
       .matches(/[A-Z]/)
-      .withMessage('Password must contain an uppercase letter')
+      .withMessage("Password must contain an uppercase letter")
       .matches(/[0-9]/)
-      .withMessage('Password must contain a number'),
+      .withMessage("Password must contain a number"),
 
-    body('age')
+    body("age")
       .optional()
       .isInt({ min: 18, max: 120 })
-      .withMessage('Age must be between 18 and 120'),
+      .withMessage("Age must be between 18 and 120"),
   ],
   handleValidationErrors,
   async (req, res) => {
@@ -435,7 +461,7 @@ app.post(
 
     const user = await User.create({ name, email, password, age });
     res.status(201).json(user);
-  },
+  }
 );
 ```
 
@@ -443,42 +469,54 @@ app.post(
 
 ```js
 // validators/userValidator.js
-import { body } from 'express-validator';
+import { body } from "express-validator";
 
 export const userValidationSchema = [
-  body('name')
+  body("name")
     .trim()
     .notEmpty()
-    .withMessage('Name is required')
+    .withMessage("Name is required")
     .isLength({ min: 2 })
-    .withMessage('Name must be at least 2 characters'),
+    .withMessage("Name must be at least 2 characters"),
 
-  body('email').trim().isEmail().withMessage('Invalid email format').normalizeEmail(),
+  body("email")
+    .trim()
+    .isEmail()
+    .withMessage("Invalid email format")
+    .normalizeEmail(),
 
-  body('password')
+  body("password")
     .isLength({ min: 8 })
-    .withMessage('Password must be at least 8 characters')
+    .withMessage("Password must be at least 8 characters")
     .matches(/[A-Z]/)
-    .withMessage('Password must contain an uppercase letter')
+    .withMessage("Password must contain an uppercase letter")
     .matches(/[0-9]/)
-    .withMessage('Password must contain a number'),
+    .withMessage("Password must contain a number"),
 
-  body('age').optional().isInt({ min: 18, max: 120 }).withMessage('Age must be between 18 and 120'),
+  body("age")
+    .optional()
+    .isInt({ min: 18, max: 120 })
+    .withMessage("Age must be between 18 and 120"),
 ];
 ```
 
 _Использование в маршрутах:_
 
 ```js
-import { userValidationSchema } from './validators/userValidator.js';
+import { userValidationSchema } from "./validators/userValidator.js";
 
-app.post('/register', userValidationSchema, handleValidationErrors, async (req, res) => {
-  // Здесь данные уже проверены
-  const { name, email, password, age } = req.body;
+app.post(
+  "/register",
+  userValidationSchema,
+  handleValidationErrors,
+  async (req, res) => {
+    // Здесь данные уже проверены
+    const { name, email, password, age } = req.body;
 
-  const user = await User.create({ name, email, password, age });
-  res.status(201).json(user);
-});
+    const user = await User.create({ name, email, password, age });
+    res.status(201).json(user);
+  }
+);
 ```
 
 Рекомендуется также _интегрировать валидацию с глобальным обработчиком ошибок_, чтобы централизованно управлять всеми ошибками в приложении.
@@ -493,7 +531,7 @@ const handleValidationErrors = (req, res, next) => {
       field: err.param,
       message: err.msg,
     }));
-    return next(new ValidationError('Validation failed', errorDetails));
+    return next(new ValidationError("Validation failed", errorDetails));
   }
   next();
 };
@@ -521,9 +559,9 @@ _Логирование_ — это процесс записи информац
 
 ```js
 // Базовое ручное логирование
-console.log('Server started on port 3000');
-console.error('Database connection failed:', error);
-console.warn('Cache is almost full');
+console.log("Server started on port 3000");
+console.error("Database connection failed:", error);
+console.warn("Cache is almost full");
 ```
 
 Данный подход подходит для простых приложений и отладки, но не масштабируется и не предоставляет гибкости. Для production приложений рекомендуется использовать специализированные библиотеки логирования.
@@ -542,32 +580,34 @@ _Базовая настройка:_
 
 ```js
 // utils/logger.js
-import winston from 'winston';
+import winston from "winston";
 
 const logger = winston.createLogger({
-  level: 'info', // Минимальный уровень логирования
+  level: "info", // Минимальный уровень логирования
 
   format: winston.format.combine(
-    winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+    winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
     winston.format.errors({ stack: true }), // Сохранять stack trace
-    winston.format.json(), // Формировать логи в JSON
+    winston.format.json() // Формировать логи в JSON
   ),
 
   // Где сохранять логи
   transports: [
     // Логи об ошибках в файл
     new winston.transports.File({
-      filename: 'logs/error.log',
-      level: 'error',
+      filename: "logs/error.log",
+      level: "error",
     }),
 
     // Все логи в файл
     new winston.transports.File({
-      filename: 'logs/combined.log',
+      filename: "logs/combined.log",
     }),
 
     // В разработке показывать в консоль
-    ...(process.env.NODE_ENV !== 'production' ? [new winston.transports.Console()] : []),
+    ...(process.env.NODE_ENV !== "production"
+      ? [new winston.transports.Console()]
+      : []),
   ],
 });
 ```
@@ -575,13 +615,13 @@ const logger = winston.createLogger({
 _Использование:_
 
 ```js
-import logger from './utils/logger.js';
+import logger from "./utils/logger.js";
 
 // Логирование разных уровней
 // 1 аргумент - сообщение, 2 аргумент - дополнительный контекст (объект)
-logger.info('User registered', { userId: 123, email: 'user@example.com' });
-logger.warn('API rate limit approaching', { remaining: 10 });
-logger.error('Database connection failed', { error: err.message });
+logger.info("User registered", { userId: 123, email: "user@example.com" });
+logger.warn("API rate limit approaching", { remaining: 10 });
+logger.error("Database connection failed", { error: err.message });
 ```
 
 ### Уровни логирования
@@ -603,23 +643,23 @@ Winston поддерживает стандартные уровни логир�
 
 ```js
 // middlewares/requestLogger.js
-import logger from '../utils/logger.js';
+import logger from "../utils/logger.js";
 
 const requestLogger = (req, res, next) => {
   const start = Date.now();
 
-  logger.info('Incoming request', {
+  logger.info("Incoming request", {
     requestId,
     method: req.method,
     path: req.path,
     ip: req.ip,
-    userAgent: req.get('user-agent'),
+    userAgent: req.get("user-agent"),
   });
 
   // res.on('finish') - событие, которое срабатывает когда ответ отправлен
   // добавляем лог по завершению запроса
-  res.on('finish', () => {
-    logger.info('Request completed', {
+  res.on("finish", () => {
+    logger.info("Request completed", {
       requestId,
       statusCode: res.statusCode,
       responseTime: Date.now() - req.startTime,
@@ -633,8 +673,8 @@ const requestLogger = (req, res, next) => {
 _Использование в приложении:_
 
 ```js
-const express = require('express');
-const requestLogger = require('./middlewares/requestLogger');
+const express = require("express");
+const requestLogger = require("./middlewares/requestLogger");
 
 const app = express();
 app.use(requestLogger);
@@ -643,7 +683,7 @@ app.use(requestLogger);
 // ...
 
 app.listen(3000, () => {
-  logger.info('Server is running on port 3000');
+  logger.info("Server is running on port 3000");
 });
 ```
 
@@ -660,9 +700,9 @@ npm install @sentry/node @sentry/tracing
 _Базовая настройка:_
 
 ```js
-import * as Sentry from '@sentry/node';
-import * as Tracing from '@sentry/tracing';
-import express from 'express';
+import * as Sentry from "@sentry/node";
+import * as Tracing from "@sentry/tracing";
+import express from "express";
 
 const app = express();
 
@@ -683,15 +723,15 @@ app.use(Sentry.Handlers.errorHandler());
 Рекомендуется в глобальном обработчике ошибок добавлять отправку ошибок в Sentry:
 
 ```js
-import * as Sentry from '@sentry/node';
+import * as Sentry from "@sentry/node";
 
 const errorHandler = (err, req, res, next) => {
-  const isDev = process.env.NODE_ENV === 'development';
+  const isDev = process.env.NODE_ENV === "development";
   const statusCode = err.statusCode || 500;
 
   const response = {
-    status: 'error',
-    message: err.message || 'Unexpected error occurred',
+    status: "error",
+    message: err.message || "Unexpected error occurred",
   };
 
   if (Array.isArray(err.errors) && err.errors.length > 0) {
@@ -738,29 +778,31 @@ npm install @logtail/winston
 _Интеграция с Winston:_
 
 ```js
-import winston from 'winston';
-import { Logtail } from '@logtail/node';
-import { LogtailTransport } from '@logtail/winston';
+import winston from "winston";
+import { Logtail } from "@logtail/node";
+import { LogtailTransport } from "@logtail/winston";
 
 const logtail = new Logtail(process.env.LOGTAIL_TOKEN);
 
 const logger = winston.createLogger({
-  level: 'info',
+  level: "info",
 
   format: winston.format.combine(
-    winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+    winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
     winston.format.errors({ stack: true }),
-    winston.format.json(),
+    winston.format.json()
   ),
 
   transports: [
     new LogtailTransport(logtail),
-    ...(process.env.NODE_ENV !== 'production' ? [new winston.transports.Console()] : []),
+    ...(process.env.NODE_ENV !== "production"
+      ? [new winston.transports.Console()]
+      : []),
   ],
 });
 
-logger.info('Server started successfully', { port: 3000 });
-logger.error('Something went wrong', { userId: 123 });
+logger.info("Server started successfully", { port: 3000 });
+logger.error("Something went wrong", { userId: 123 });
 ```
 
 После подключения все логи будут доступны в веб-интерфейсе Logtail, где их можно фильтровать и просматривать в реальном времени.
@@ -816,7 +858,7 @@ class ErrorHandler {
     }
 
     // Обработчик по умолчанию
-    return res.status(500).json({ message: 'Internal Server Error' });
+    return res.status(500).json({ message: "Internal Server Error" });
   }
 }
 
@@ -825,20 +867,20 @@ export default new ErrorHandler();
 
 ```js
 // errors/errorHandlers.js
-import ErrorHandler from './Handler.js';
-import { BookNotFoundError, ValidationError } from './index.js';
+import ErrorHandler from "./Handler.js";
+import { BookNotFoundError, ValidationError } from "./index.js";
 
 // Регистрируем обработчики
 ErrorHandler.register(BookNotFoundError, (error, req, res) => {
   return res.status(404).json({
-    status: 'not_found',
+    status: "not_found",
     message: error.message,
   });
 });
 
 ErrorHandler.register(ValidationError, (error, req, res) => {
   return res.status(400).json({
-    status: 'validation_error',
+    status: "validation_error",
     message: error.message,
     errors: error.errors,
   });
@@ -846,17 +888,17 @@ ErrorHandler.register(ValidationError, (error, req, res) => {
 
 ErrorHandler.register(AppError, (error, req, res) => {
   return res.status(error.statusCode).json({
-    status: 'error',
+    status: "error",
     message: error.message,
   });
 });
 
 // Обработчик по умолчанию для всех остальных ошибок
 ErrorHandler.register(Error, (error, req, res) => {
-  console.error('Unexpected error:', error);
+  console.error("Unexpected error:", error);
   // Здесь можно добавить дополнительную логику, например, отправку уведомлений в Sentry
   return res.status(500).json({
-    message: 'Something went wrong',
+    message: "Something went wrong",
   });
 });
 
@@ -865,7 +907,7 @@ export { ErrorHandler };
 
 ```js
 // middlewares/errorHandler.js
-import ErrorHandler from '../errors/errorHandlers.js';
+import ErrorHandler from "../errors/errorHandlers.js";
 
 const errorHandlingMiddleware = (err, req, res, next) => {
   ErrorHandler.handle(err, req, res);
