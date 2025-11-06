@@ -2,8 +2,8 @@ import winston from "winston";
 import { Logtail } from "@logtail/node";
 import { LogtailTransport } from "@logtail/winston";
 
-export const logtail = new Logtail("uWZQrqcDuuSYtSNQGyfNcZLS", {
-    endpoint: "https://s1573079.eu-nbg-2.betterstackdata.com",
+export const logtail = new Logtail(process.env.LOGTAIL_SOURCE_TOKEN, {
+    endpoint: process.env.LOGTAIL_ENDPOINT,
 });
 
 const logger = winston.createLogger({
