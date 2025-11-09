@@ -1,5 +1,39 @@
 # Введение в ORM
 
+## Содержание
+
+- [Введение в ORM](#введение-в-orm)
+  - [Содержание](#содержание)
+  - [Введение](#введение)
+  - [Как работает ORM?](#как-работает-orm)
+  - [Преимущества и недостатки использования ORM](#преимущества-и-недостатки-использования-orm)
+  - [Использование библиотеки ORM Sequelize с PostgreSQL](#использование-библиотеки-orm-sequelize-с-postgresql)
+    - [Установка и подключение Sequelize к PostgreSQL](#установка-и-подключение-sequelize-к-postgresql)
+    - [Структура проекта Node.js с использованием Sequelize](#структура-проекта-nodejs-с-использованием-sequelize)
+    - [Определение моделей данных](#определение-моделей-данных)
+    - [Наименование таблиц и колонок](#наименование-таблиц-и-колонок)
+    - [Timestamps (createdAt, updatedAt)](#timestamps-createdat-updatedat)
+    - [Синхронизация моделей с базой данных](#синхронизация-моделей-с-базой-данных)
+    - [Работа с данными через модели](#работа-с-данными-через-модели)
+      - [Создание записей (INSERT)](#создание-записей-insert)
+      - [Чтение данных (SELECT)](#чтение-данных-select)
+      - [Обновление записей (UPDATE)](#обновление-записей-update)
+      - [Удаление записей (DELETE)](#удаление-записей-delete)
+      - [Дополнительные опции запросов](#дополнительные-опции-запросов)
+    - [Связи между моделями (ассоциации)](#связи-между-моделями-ассоциации)
+      - [Один-ко-многим (One-to-Many) и Один-к-одному (One-to-One)](#один-ко-многим-one-to-many-и-один-к-одному-one-to-one)
+      - [Многие-ко-многим (Many-to-Many)](#многие-ко-многим-many-to-many)
+      - [Получение связанных данных (Eager Loading)](#получение-связанных-данных-eager-loading)
+      - [Проблема N+1 запросов](#проблема-n1-запросов)
+  - [Миграции в Sequelize](#миграции-в-sequelize)
+    - [Установка и настройка sequelize-cli](#установка-и-настройка-sequelize-cli)
+    - [Конфигурация sequelize-cli](#конфигурация-sequelize-cli)
+    - [Создание миграций и моделей](#создание-миграций-и-моделей)
+    - [Применение и откат миграций](#применение-и-откат-миграций)
+  - [Немного о Prisma ORM](#немного-о-prisma-orm)
+
+## Введение
+
 Прежде чем перейти к следующему разделу, давайте рассмотрим, что такое ORM и почему этот паттерн широко используется в разработке программного обеспечения.
 
 _ORM (Object-Relational Mapping)_ — это паттерн проектирования, который позволяет взаимодействовать с базой данных через объектно-ориентированный подход [^1]. С помощью ORM данные в базе данных представляются в виде объектов, что значительно упрощает процесс работы с ними, позволяя разработчикам манипулировать данными, используя привычные объекты и методы своего языка программирования, вместо того чтобы писать SQL-запросы напрямую [^2].
@@ -21,19 +55,19 @@ CREATE TABLE users (
 Чтобы получить всех пользователей из этой таблицы, стандартный SQL-запрос в Node.JS (Express) будет выглядеть так:
 
 ```javascript
-const { Pool } = require("pg");
+const { Pool } = require('pg');
 
 const pool = new Pool({
   // параметры подключения
 });
 
-app.get("/users", async (req, res) => {
+app.get('/users', async (req, res) => {
   try {
-    const result = await pool.query("SELECT * FROM users");
+    const result = await pool.query('SELECT * FROM users');
     res.json(result.rows);
   } catch (err) {
     console.error(err);
-    res.status(500).send("Server Error");
+    res.status(500).send('Server Error');
   }
 });
 ```
@@ -45,7 +79,7 @@ app.get("/users", async (req, res) => {
 let user = Users.findAll();
 
 // Создание нового пользователя
-let newUser = Users.create({ name: "John Doe", email: "john.doe@example.com" });
+let newUser = Users.create({ name: 'John Doe', email: 'john.doe@example.com' });
 ```
 
 - Выше представлен "псевдокод", так как синтаксис может различаться в зависимости от используемой ORM-библиотеки.
@@ -95,12 +129,12 @@ npm install --save pg
 ```javascript
 // config/db.js
 
-import { Sequelize } from "sequelize";
+import { Sequelize } from 'sequelize';
 
 // Параметры подключения к БД:
-const sequelize = new Sequelize("myapp_db", "db_user", "db_password", {
-  host: "localhost",
-  dialect: "postgres",
+const sequelize = new Sequelize('myapp_db', 'db_user', 'db_password', {
+  host: 'localhost',
+  dialect: 'postgres',
 });
 
 export default sequelize;
@@ -170,10 +204,10 @@ _Модель в Sequelize_ — это класс (или описанный ч�
 // models/User.js
 
 // Импортируем конструкторы DataTypes для описания типов:
-import { DataTypes } from "sequelize";
-import sequelize from "../config/db.js"; // Импортируем инициализированный экземпляр Sequelize
+import { DataTypes } from 'sequelize';
+import sequelize from '../config/db.js'; // Импортируем инициализированный экземпляр Sequelize
 
-export const User = sequelize.define("User", {
+export const User = sequelize.define('User', {
   firstName: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -236,9 +270,9 @@ id: {
 Для этого, можно глобально использовать опцию `underscored: true` при инициализации Sequelize:
 
 ```js
-const sequelize = new Sequelize("myapp_db", "username", "password", {
-  host: "localhost",
-  dialect: "postgres",
+const sequelize = new Sequelize('myapp_db', 'username', 'password', {
+  host: 'localhost',
+  dialect: 'postgres',
   define: {
     underscored: true, // firstName -> first_name; UserId -> user_id
   },
@@ -249,20 +283,20 @@ const sequelize = new Sequelize("myapp_db", "username", "password", {
 
 ```js
 const User = sequelize.define(
-  "User",
+  'User',
   {
     firstName: {
       type: DataTypes.STRING,
-      field: "first_name", // Переименование колонки
+      field: 'first_name', // Переименование колонки
     },
     lastName: {
       type: DataTypes.STRING,
-      field: "last_name",
+      field: 'last_name',
     },
   },
   {
-    tableName: "users",
-  }
+    tableName: 'users',
+  },
 );
 ```
 
@@ -274,13 +308,13 @@ const User = sequelize.define(
 
 ```js
 const User = sequelize.define(
-  "User",
+  'User',
   {
     // поля модели
   },
   {
     timestamps: false, // Отключить автоматические поля createdAt и updatedAt
-  }
+  },
 );
 ```
 
@@ -304,8 +338,8 @@ const User = sequelize.define(
    // app.js
 
    // Импортируем модели, чтобы они были зарегистрированы в Sequelize
-   import "./models/User.js";
-   import "./models/Post.js";
+   import './models/User.js';
+   import './models/Post.js';
 
    // Синхронизируем модели с базой данных
    const sequelize = mustDBConnect();
@@ -314,10 +348,10 @@ const User = sequelize.define(
    sequelize
      .sync()
      .then(() => {
-       console.log("Таблицы созданы или уже существуют.");
+       console.log('Таблицы созданы или уже существуют.');
      })
      .catch((err) => {
-       console.error("Ошибка при создании таблиц:", err);
+       console.error('Ошибка при создании таблиц:', err);
      });
    ```
 
@@ -336,8 +370,8 @@ Sequelize предоставляет удобные методы для выпо
 Для добавления новой строки в таблицу используется метод `create()`. Он вызывается на модели и в него передается объект с данными новой записи. Например, создадим нового пользователя:
 
 ```js
-const jane = await User.create({ firstName: "Jane", lastName: "Doe" });
-console.log("Новый пользователь ID:", jane.id);
+const jane = await User.create({ firstName: 'Jane', lastName: 'Doe' });
+console.log('Новый пользователь ID:', jane.id);
 ```
 
 Этот код выполнит SQL-запрос `INSERT INTO "Users" ("firstName", "lastName", "createdAt", "updatedAt") VALUES ('Jane', 'Doe', NOW(), NOW()) RETURNING *;` и вернет созданный объект пользователя с заполненным полем `id`.
@@ -366,7 +400,7 @@ users.forEach((user) => {
 
 ```js
 const doeUsers = await User.findAll({
-  where: { lastName: "Doe" },
+  where: { lastName: 'Doe' },
 });
 // Выполнится SQL: SELECT * FROM Users WHERE lastName = 'Doe';
 ```
@@ -374,7 +408,7 @@ const doeUsers = await User.findAll({
 Объект where позволяет задавать условия – в простейшем случае совпадение значения поля. Sequelize также поддерживает различные операторы (например, сравнение, `LIKE`, `BETWEEN` и т.д.) через синтаксис вида `[Op.gt]`, `[Op.like]` и др., но в базовом случае достаточен объект с полями и значениями.
 
 ```javascript
-import { Op } from "sequelize";
+import { Op } from 'sequelize';
 const recentUsers = await User.findAll({
   where: {
     createdAt: {
@@ -389,11 +423,11 @@ const recentUsers = await User.findAll({
 - `findOne()` – находит одну запись (первую, удовлетворяющую условию). Если ничего не найдено, вернет `null`.
 
   ```js
-  const user = await User.findOne({ where: { email: "jane.doe@example.com" } });
+  const user = await User.findOne({ where: { email: 'jane.doe@example.com' } });
   if (user) {
     console.log(user.firstName, user.lastName);
   } else {
-    console.log("Пользователь не найден");
+    console.log('Пользователь не найден');
   }
   ```
 
@@ -404,7 +438,7 @@ const recentUsers = await User.findAll({
   if (user) {
     console.log(user.firstName, user.lastName);
   } else {
-    console.log("Пользователь не найден");
+    console.log('Пользователь не найден');
   }
   ```
 
@@ -412,20 +446,17 @@ const recentUsers = await User.findAll({
 
   ```js
   const [user, created] = await User.findOrCreate({
-    where: { email: "jane.doe@example.com" },
-    defaults: { firstName: "Jane", lastName: "Doe" },
+    where: { email: 'jane.doe@example.com' },
+    defaults: { firstName: 'Jane', lastName: 'Doe' },
   });
-  console.log(
-    user.id,
-    created ? "Создан новый пользователь" : "Пользователь найден"
-  );
+  console.log(user.id, created ? 'Создан новый пользователь' : 'Пользователь найден');
   ```
 
 - `findAndCountAll()` – возвращает объект с массивом найденных записей и общим числом записей, удовлетворяющих условию (полезно для пагинации).
 
   ```js
   const { count, rows } = await User.findAndCountAll({
-    where: { lastName: "Doe" },
+    where: { lastName: 'Doe' },
     limit: 10,
     offset: 0,
   });
@@ -444,7 +475,7 @@ const recentUsers = await User.findAll({
 Обновление существующих записей выполняется методом `update()`, который вызывается на модели. В метод передаются два аргумента: объект с новыми значениями полей и объект `where` для выбора записей, которые нужно обновить. Например, установим для всех пользователей без фамилии значение фамилии "Doe":
 
 ```js
-await User.update({ lastName: "Doe" }, { where: { lastName: null } });
+await User.update({ lastName: 'Doe' }, { where: { lastName: null } });
 // Выполнится SQL: UPDATE "Users" SET "lastName"='Doe' WHERE "lastName" IS NULL;
 ```
 
@@ -453,14 +484,11 @@ await User.update({ lastName: "Doe" }, { where: { lastName: null } });
 Метод `update` возвращает массив с числом затронутых строк. То есть успешность операции можно проверить так:
 
 ```js
-const [affectedCount] = await User.update(
-  { lastName: "Doe" },
-  { where: { lastName: null } }
-);
+const [affectedCount] = await User.update({ lastName: 'Doe' }, { where: { lastName: null } });
 if (affectedCount > 0) {
   console.log(`Обновлено записей: ${affectedCount}`);
 } else {
-  console.log("Записи для обновления не найдены");
+  console.log('Записи для обновления не найдены');
 }
 ```
 
@@ -470,9 +498,9 @@ if (affectedCount > 0) {
 const user = await User.findByPk(1);
 
 if (user) {
-  user.lastName = "Smith";
+  user.lastName = 'Smith';
   await user.save(); // Сохранит изменения в базе
-  console.log("Пользователь обновлен:", user);
+  console.log('Пользователь обновлен:', user);
 }
 ```
 
@@ -482,7 +510,7 @@ if (user) {
 
 ```js
 await User.destroy({
-  where: { firstName: "Jane" },
+  where: { firstName: 'Jane' },
 });
 // Выполнится SQL: DELETE FROM "Users" WHERE "firstName"='Jane';
 ```
@@ -490,7 +518,7 @@ await User.destroy({
 Этот код сформирует SQL запрос на удаление всех строк, где `firstName` равно "Jane" и удалит все строки, удовлетворяющие условию. Как и в случае с `update`, метод `destroy` возвращает количество удаленных строк, что позволяет проверить успешность операции:
 
 ```js
-const deletedCount = await User.destroy({ where: { firstName: "Jane" } });
+const deletedCount = await User.destroy({ where: { firstName: 'Jane' } });
 console.log(`Удалено пользователей: ${deletedCount}`);
 ```
 
@@ -500,9 +528,9 @@ Sequelize предоставляет и другие полезные опции
 
 ```js
 const users = await User.findAll({
-  attributes: ["firstName", "lastName"], // Выбрать только эти поля
-  where: { lastName: "Doe" },
-  order: [["createdAt", "DESC"]], // Сортировка по дате создания, по убыванию
+  attributes: ['firstName', 'lastName'], // Выбрать только эти поля
+  where: { lastName: 'Doe' },
+  order: [['createdAt', 'DESC']], // Сортировка по дате создания, по убыванию
   limit: 10, // Максимум 10 записей
   offset: 0, // Пропустить первые 0 записей (для пагинации)
 });
@@ -538,7 +566,7 @@ const users = await User.findAll({
 ```js
 // models/Post.js
 // Определим модель Post для примера
-const Post = sequelize.define("Post", {
+const Post = sequelize.define('Post', {
   title: DataTypes.STRING,
   content: DataTypes.TEXT,
 });
@@ -586,8 +614,8 @@ Profile.belongsTo(User);
 Чтобы переименовать внешний ключ, можно использовать опцию `foreignKey` в ассоциациях:
 
 ```js
-Post.belongsTo(User, { foreignKey: "authorId" });
-User.hasMany(Post, { foreignKey: "authorId" });
+Post.belongsTo(User, { foreignKey: 'authorId' });
+User.hasMany(Post, { foreignKey: 'authorId' });
 ```
 
 `foreignKey` необходимо указывать и в `belongsTo`, и в `hasMany`, чтобы обе модели использовали одно и то же имя внешнего ключа.
@@ -600,8 +628,8 @@ User.hasMany(Post, { foreignKey: "authorId" });
 - `onDelete: 'RESTRICT'` – запретит удаление пользователя, если у него есть связанные посты.
 
 ```js
-Post.belongsTo(User, { foreignKey: "authorId", onDelete: "CASCADE" });
-User.hasMany(Post, { foreignKey: "authorId", onDelete: "CASCADE" });
+Post.belongsTo(User, { foreignKey: 'authorId', onDelete: 'CASCADE' });
+User.hasMany(Post, { foreignKey: 'authorId', onDelete: 'CASCADE' });
 ```
 
 #### Многие-ко-многим (Many-to-Many)
@@ -612,16 +640,16 @@ User.hasMany(Post, { foreignKey: "authorId", onDelete: "CASCADE" });
 
 ```js
 // models/Tag.js
-const Tag = sequelize.define("Tag", {
+const Tag = sequelize.define('Tag', {
   name: DataTypes.STRING,
 });
 
-Tag.belongsToMany(Post, { through: "PostTags" }); // Связь Tag
+Tag.belongsToMany(Post, { through: 'PostTags' }); // Связь Tag
 ```
 
 ```js
 // models/Post.js
-Post.belongsToMany(Tag, { through: "PostTags" }); // Связь Post
+Post.belongsToMany(Tag, { through: 'PostTags' }); // Связь Post
 ```
 
 Параметр `through` указывает имя промежуточной таблицы (или модель) для хранения связей. Эта команда создаст (или переиспользует, если существует) таблицу PostTags с колонками внешних ключей, например `postId` и `tagId`, связывающими записи. Для связи многие-ко-многим необходимо вызвать `belongsToMany` у обеих моделей.
@@ -630,14 +658,14 @@ Post.belongsToMany(Tag, { through: "PostTags" }); // Связь Post
 
 ```js
 Post.belongsToMany(Tag, {
-  through: "PostTags",
-  foreignKey: "post_id",
-  otherKey: "tag_id",
+  through: 'PostTags',
+  foreignKey: 'post_id',
+  otherKey: 'tag_id',
 });
 Tag.belongsToMany(Post, {
-  through: "PostTags",
-  foreignKey: "tag_id",
-  otherKey: "post_id",
+  through: 'PostTags',
+  foreignKey: 'tag_id',
+  otherKey: 'post_id',
 });
 ```
 
@@ -653,7 +681,7 @@ const usersWithPosts = await User.findAll({
 usersWithPosts.forEach((user) => {
   console.log(user.firstName, user.lastName);
   user.Posts.forEach((post) => {
-    console.log(" -", post.title);
+    console.log(' -', post.title);
   });
 });
 ```
@@ -767,7 +795,7 @@ DB_HOST=localhost
 
 ```js
 // config/config.js
-import dotenv from "dotenv";
+import dotenv from 'dotenv';
 
 dotenv.config();
 
@@ -777,21 +805,21 @@ export default {
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
     host: process.env.DB_HOST,
-    dialect: "postgres",
+    dialect: 'postgres',
   },
   test: {
     username: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_TEST_NAME,
     host: process.env.DB_HOST,
-    dialect: "postgres",
+    dialect: 'postgres',
   },
   production: {
     username: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_PROD_NAME,
     host: process.env.DB_HOST,
-    dialect: "postgres",
+    dialect: 'postgres',
   },
 };
 ```
@@ -821,11 +849,11 @@ npx sequelize-cli model:generate --name User --attributes firstName:string,lastN
 
 ```js
 // migrations/XXXXXXXXXXXXXX-create-user.js
-"use strict";
+'use strict';
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable("Users", {
+    await queryInterface.createTable('Users', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -852,7 +880,7 @@ module.exports = {
     });
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable("Users");
+    await queryInterface.dropTable('Users');
   },
 };
 ```
@@ -861,15 +889,15 @@ module.exports = {
 
 ```js
 // models/user.js
-"use strict";
+'use strict';
 
-const { Model } = require("sequelize");
+const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
     static associate(models) {
       // указываем ассоциации, если есть
-      User.hasMany(models.Post, { foreignKey: "userId" });
+      User.hasMany(models.Post, { foreignKey: 'userId' });
     }
   }
 
@@ -881,24 +909,24 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
-      modelName: "User",
-    }
+      modelName: 'User',
+    },
   );
   return User;
 };
 ```
 
-*Примечание*: В современном JS рекомендуется использовать ESM-модули (import/export) вместо CommonJS (require/module.exports). Однако `sequelize-cli` по умолчанию генерирует файлы в формате CommonJS. Чтобы использовать ESM, потребуется дополнительная настройка.
+_Примечание_: В современном JS рекомендуется использовать ESM-модули (import/export) вместо CommonJS (require/module.exports). Однако `sequelize-cli` по умолчанию генерирует файлы в формате CommonJS. Чтобы использовать ESM, потребуется дополнительная настройка.
 
 ```js
 // models/User.js
 
-import { Model, DataTypes } from "sequelize";
+import { Model, DataTypes } from 'sequelize';
 
 export default (sequelize) => {
   class User extends Model {
     static associate(models) {
-      User.hasMany(models.Post, { foreignKey: "userId" });
+      User.hasMany(models.Post, { foreignKey: 'userId' });
     }
   }
 
@@ -910,8 +938,8 @@ export default (sequelize) => {
     },
     {
       sequelize,
-      modelName: "User",
-    }
+      modelName: 'User',
+    },
   );
   return User;
 };
