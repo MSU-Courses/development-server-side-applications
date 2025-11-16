@@ -1204,8 +1204,8 @@ _WebHook_ — это способ отправки данных от одног�
 - _Message Queues (RabbitMQ, Kafka)_ — асинхронная доставка сообщений.
 - _Apache Thrift_ — фреймворк для разработки сервисов с кроссплатформенной совместимостью.
 
-[^1]: Roy Thomas Fielding. _Architectural Styles and the Design of Network-based Software Architectures_. Doctoral dissertation, University of California, Irvine, 2000. [online] Available at: https://www.ics.uci.edu/~fielding/pubs/dissertation/top.htm ↩
-[^2]: _HTTP PATCH Method_. IETF RFC 5789. [online] Available at: https://tools.ietf.org/html/rfc5789 ↩
-[^3]: _SOAP: Simple Object Access Protocol_. W3C Recommendation. [online] Available at: https://www.w3.org/TR/soap12/ ↩
-[^4]: _GraphQL Specification_. [online] Available at: https://spec.graphql.org/ ↩
-[^5]: _The WebSocket Protocol_. IETF RFC 6455. [online] Available at: https://tools.ietf.org/html/rfc6455 ↩
+[^1]: Roy Thomas Fielding. _Architectural Styles and the Design of Network-based Software Architectures_. Doctoral dissertation, University of California, Irvine, 2000. [online] Available at: https://www.ics.uci.edu/~fielding/pubs/dissertation/top.htm 
+[^2]: _HTTP PATCH Method_. IETF RFC 5789. [online] Available at: https://tools.ietf.org/html/rfc5789 
+[^3]: _SOAP: Simple Object Access Protocol_. W3C Recommendation. [online] Available at: https://www.w3.org/TR/soap12/ 
+[^4]: _GraphQL Specification_. [online] Available at: https://spec.graphql.org/ 
+[^5]: _The WebSocket Protocol_. IETF RFC 6455. [online] Available at: https://tools.ietf.org/html/rfc6455 
