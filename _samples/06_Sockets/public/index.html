@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Socket.IO Chat с комнатами</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="chat-wrapper">
+      <!-- SIDEBAR -->
+      <aside class="chat-sidebar">
+        <div class="chat-logo">
+          <div class="chat-logo-icon">RM</div>
+          <div class="chat-logo-text">
+            <span>Realtime Chat</span>
+            <span>Комнаты на Socket.IO</span>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <span class="field-label">Профиль</span>
+          <input type="text" id="username" class="input" placeholder="Ваше имя (например, Emma)" />
+        </div>
+
+        <div class="field-group">
+          <span class="field-label">Комната</span>
+          <div style="display: flex; flex-direction: column; gap: 14px">
+            <input
+              type="text"
+              id="roomId"
+              class="input"
+              placeholder="room1, dev-chat, group42..."
+            />
+            <button class="btn" onclick="joinRoom()">
+              <span class="icon">➜</span>
+              <span>Войти</span>
+            </button>
+          </div>
+          <div class="hint">
+            Чтобы проверить комнаты — просто открой второе окно в другом браузере и зайди в ту же
+            комнату.
+          </div>
+        </div>
+      </aside>
+
+      <!-- MAIN CHAT -->
+      <section class="chat-main">
+        <header class="chat-header">
+          <div class="chat-header-left">
+            <div class="room-title" id="roomTitle">Нет активной комнаты</div>
+            <div class="room-subtitle" id="roomSubtitle">
+              Введите имя и ID комнаты слева, чтобы начать.
+            </div>
+          </div>
+          <div class="chat-header-right">
+            <div class="status-badge">
+              <div class="status-dot"></div>
+              <span>Online</span>
+            </div>
+            <div class="user-tag">Вы: <span id="currentUserLabel">—</span></div>
+          </div>
+        </header>
+
+        <div class="chat-body">
+          <div id="messages" class="messages"></div>
+
+          <div class="typing-indicator-wrapper">
+            <div id="typingIndicator" class="typing-indicator hidden">
+              <span id="typingLabel" class="typing-label"></span>
+              <div class="typing-dots">
+                <span class="typing-dot"></span>
+                <span class="typing-dot"></span>
+                <span class="typing-dot"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="chat-input">
+          <div class="input-row">
+            <input
+              type="text"
+              id="input"
+              class="input-message"
+              placeholder="Напишите сообщение и нажмите Enter…"
+            />
+            <button class="btn send-btn" onclick="sendMessage()">
+              <span class="icon">✉️</span>
+              <span>Отправить</span>
+            </button>
+          </div>
+          <div class="input-hint">
+            <span>Сообщение увидят только пользователи этой комнаты.</span>
+            <span><span class="kbd">Enter</span> — отправить</span>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Client Side для логики Socket.io -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      const socket = io();
+
+      let currentUsername = '';
+      let currentRoom = '';
+      let typingTimeout = null;
+
+      const messagesDiv = document.getElementById('messages');
+      const typingIndicator = document.getElementById('typingIndicator');
+      const typingLabel = document.getElementById('typingLabel');
+      const roomTitle = document.getElementById('roomTitle');
+      const roomSubtitle = document.getElementById('roomSubtitle');
+      const currentUserLabel = document.getElementById('currentUserLabel');
+      const inputEl = document.getElementById('input');
+
+      function joinRoom() {
+        const username = document.getElementById('username').value.trim();
+        const roomId = document.getElementById('roomId').value.trim();
+
+        if (!username || !roomId) {
+          alert('Заполните имя и ID комнаты');
+          return;
+        }
+
+        currentUsername = username;
+        currentRoom = roomId;
+
+        // Посылаем событие на сервер о присоединении к комнате
+        socket.emit('join-room', { roomId, username });
+
+        currentUserLabel.textContent = currentUsername;
+        roomTitle.textContent = `Комната: ${roomId}`;
+        roomSubtitle.textContent = 'Общайтесь в реальном времени с участниками этой комнаты.';
+
+        addSystemMessage(`Вы присоединились к комнате ${roomId}`);
+      }
+
+      function sendMessage() {
+        const text = inputEl.value.trim();
+        if (!text || !currentRoom) return;
+
+        // Отправляем событие "send-message" на сервер
+        // с текстом сообщения
+        socket.emit('send-message', { message: text });
+        inputEl.value = '';
+      }
+
+      // Отправка по Enter
+      inputEl.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          sendMessage();
+        }
+      });
+
+      ////////////////////////////////////////
+      // Обработка входящих событий от сервера
+      ////////////////////////////////////////
+
+      // Получение сообщения
+      socket.on('receive-message', (data) => {
+        const isMe = data.username === currentUsername;
+        addChatMessage(data.username, data.message, data.timestamp, isMe);
+      });
+
+      // Пользователь вошел/вышел
+      socket.on('user-joined', (data) => {
+        addSystemMessage(data.message);
+      });
+
+      // Пользователь вышел
+      socket.on('user-left', (data) => {
+        addSystemMessage(data.message);
+      });
+
+      // Индикатор "печатает"
+      socket.on('user-is-typing', (data) => {
+        if (!currentRoom) return;
+
+        typingLabel.textContent = `${data.username} печатает`;
+        typingIndicator.classList.remove('hidden');
+
+        if (typingTimeout) {
+          clearTimeout(typingTimeout);
+        }
+
+        // Спрячем индикатор, если нет новых событий через 2 секунды
+        typingTimeout = setTimeout(() => {
+          typingIndicator.classList.add('hidden');
+        }, 2000);
+      });
+
+      // Когда мы что-то вводим — отправляем событие "печатает"
+      // В данном случае можно отправлять событие каждые N секунд,
+      // чтобы не спамить сервер слишком часто
+      inputEl.addEventListener('input', () => {
+        if (!currentRoom) return;
+        socket.emit('user-typing');
+      });
+
+      // Рендер сообщений
+      function addChatMessage(username, message, time = '', isMe = false) {
+        const row = document.createElement('div');
+        row.className = 'message-row ' + (isMe ? 'me' : 'other');
+
+        const bubble = document.createElement('div');
+        bubble.className = 'message-bubble';
+
+        const meta = document.createElement('div');
+        meta.className = 'msg-meta';
+
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'msg-username';
+        nameSpan.textContent = username;
+
+        const timeSpan = document.createElement('span');
+        timeSpan.className = 'msg-time';
+        timeSpan.textContent = time || '';
+
+        meta.appendChild(nameSpan);
+        meta.appendChild(timeSpan);
+
+        const textSpan = document.createElement('div');
+        textSpan.textContent = message;
+
+        bubble.appendChild(meta);
+        bubble.appendChild(textSpan);
+
+        row.appendChild(bubble);
+        messagesDiv.appendChild(row);
+        scrollMessagesToBottom();
+      }
+
+      // Рендер системных сообщений
+      function addSystemMessage(message) {
+        const row = document.createElement('div');
+        row.className = 'message-row system';
+
+        const bubble = document.createElement('div');
+        bubble.className = 'message-bubble';
+        bubble.textContent = message;
+
+        row.appendChild(bubble);
+        messagesDiv.appendChild(row);
+        scrollMessagesToBottom();
+      }
+
+      function scrollMessagesToBottom() {
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      }
+    </script>
+  </body>
+</html>
