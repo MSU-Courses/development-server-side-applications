@@ -29,7 +29,7 @@
     - [Mocking с Jest](#mocking-с-jest)
       - [Пример Mocking функции](#пример-mocking-функции)
     - [Spying на функции](#spying-на-функции)
-  - [](#)
+  - [Методологии тестирования: TDD и BDD](#методологии-тестирования-tdd-и-bdd)
     - [TDD: Test-Driven Development](#tdd-test-driven-development)
       - [Что такое TDD?](#что-такое-tdd)
       - [Пример TDD: реализация функции валидации почты](#пример-tdd-реализация-функции-валидации-почты)
@@ -839,7 +839,7 @@ describe("Logger", () => {
 });
 ```
 
-##
+## Методологии тестирования: TDD и BDD
 
 ### TDD: Test-Driven Development
 
