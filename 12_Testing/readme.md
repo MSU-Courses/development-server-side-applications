@@ -37,13 +37,6 @@
     - [BDD: Behavior-Driven Development](#bdd-behavior-driven-development)
       - [Что такое BDD?](#что-такое-bdd)
       - [BDD с Jest](#bdd-с-jest)
-  - [Лучшие практики тестирования](#лучшие-практики-тестирования)
-    - [Arrange-Act-Assert (AAA) паттерн](#arrange-act-assert-aaa-паттерн)
-    - [One assertion per test (когда возможно)](#one-assertion-per-test-когда-возможно)
-    - [Тестируйте граничные случаи (Edge Cases)](#тестируйте-граничные-случаи-edge-cases)
-    - [Используйте Setup и Teardown](#используйте-setup-и-teardown)
-    - [Тестируйте поведение, а не реализацию](#тестируйте-поведение-а-не-реализацию)
-    - [Избегайте флаксных тестов](#избегайте-флаксных-тестов)
   - [Покрытие кода тестами (Code Coverage)](#покрытие-кода-тестами-code-coverage)
     - [Что такое покрытие?](#что-такое-покрытие)
     - [Создание отчёта о покрытии](#создание-отчёта-о-покрытии)
@@ -51,6 +44,13 @@
   - [Документация тестов](#документация-тестов)
     - [Важность документации тестов](#важность-документации-тестов)
     - [Примеры хорошей документации](#примеры-хорошей-документации)
+  - [Лучшие практики тестирования](#лучшие-практики-тестирования)
+    - [Arrange-Act-Assert (AAA) паттерн](#arrange-act-assert-aaa-паттерн)
+    - [One assertion per test (когда возможно)](#one-assertion-per-test-когда-возможно)
+    - [Тестируйте граничные случаи (Edge Cases)](#тестируйте-граничные-случаи-edge-cases)
+    - [Используйте Setup и Teardown](#используйте-setup-и-teardown)
+    - [Тестируйте поведение, а не реализацию](#тестируйте-поведение-а-не-реализацию)
+    - [Избегайте флаксных тестов](#избегайте-флаксных-тестов)
 
 ## Предисловие: История, которая вас заставит писать тесты
 
@@ -119,22 +119,22 @@ export default sum;
 
 ```js
 // tests/math.test.js
-import sum from "../src/math";
+import sum from '../src/math';
 
 // describe, it - функции для организации тестов
 // describe - группа тестов
 // it - отдельный тест
 // данные функции будут рассмотрены позже
-describe("sum function", () => {
-  it("should add two positive numbers correctly", () => {
+describe('sum function', () => {
+  it('should add two positive numbers correctly', () => {
     expect(sum(2, 3)).toBe(5);
   });
 
-  it("should add negative numbers correctly", () => {
+  it('should add negative numbers correctly', () => {
     expect(sum(-2, -3)).toBe(-5);
   });
 
-  it("should handle zero", () => {
+  it('should handle zero', () => {
     expect(sum(0, 5)).toBe(5);
   });
 });
@@ -155,7 +155,7 @@ _Пример: Тестирование создания задачи в ToDo п
 
 ```js
 // src/controllers/todoController.js
-import TodoModel from "../models/todoModel";
+import TodoModel from '../models/todoModel';
 
 async function createTodo(req, res) {
   try {
@@ -172,13 +172,13 @@ export default createTodo;
 
 ```js
 // src/models/todoModel.js
-import pool from "../db/pool";
+import pool from '../db/pool';
 
 async function create(todoData) {
   const { title, description } = todoData;
   const result = await pool.query(
-    "INSERT INTO todos (title, description) VALUES ($1, $2) RETURNING *",
-    [title, description]
+    'INSERT INTO todos (title, description) VALUES ($1, $2) RETURNING *',
+    [title, description],
   );
   return result.rows[0];
 }
@@ -188,27 +188,27 @@ export default { create };
 
 ```js
 // tests/todoController.integration.test.js
-import request from "supertest";
-import app from "../src/app"; // Express приложение
-import TodoModel from "../src/models/todoModel";
+import request from 'supertest';
+import app from '../src/app'; // Express приложение
+import TodoModel from '../src/models/todoModel';
 
-describe("Todo Controller Integration Tests", () => {
+describe('Todo Controller Integration Tests', () => {
   beforeEach(async () => {
     // Очищаем БД перед каждым тестом
     await TodoModel.deleteMany({});
   });
 
-  it("should create a new todo", async () => {
+  it('should create a new todo', async () => {
     // Выполняем HTTP запрос к нашему API
     const response = await request(app)
-      .post("/todos")
+      .post('/todos')
       .send({
-        title: "Learn testing",
-        description: "Master Jest and Supertest",
+        title: 'Learn testing',
+        description: 'Master Jest and Supertest',
       })
       .expect(201);
 
-    expect(response.body.title).toBe("Learn testing");
+    expect(response.body.title).toBe('Learn testing');
     expect(response.body.id).toBeDefined();
 
     // Проверяем, что todo действительно сохранён в БД
@@ -234,48 +234,48 @@ _Пример: Тестирование полного сценария зака
 
 ```js
 // tests/foodOrder.e2e.test.js
-import request from "supertest";
-import app from "../src/app"; // Express приложение
-import UserModel from "../src/models/userModel";
-import OrderModel from "../src/models/orderModel";
-describe("Food Order E2E Tests", () => {
+import request from 'supertest';
+import app from '../src/app'; // Express приложение
+import UserModel from '../src/models/userModel';
+import OrderModel from '../src/models/orderModel';
+describe('Food Order E2E Tests', () => {
   let userToken;
 
   beforeAll(async () => {
     // Создаём тестового пользователя и получаем токен аутентификации
     const userResponse = await request(app)
-      .post("/users/register")
-      .send({ username: "testuser", password: "password" });
+      .post('/users/register')
+      .send({ username: 'testuser', password: 'password' });
     const loginResponse = await request(app)
-      .post("/users/login")
-      .send({ username: "testuser", password: "password" });
+      .post('/users/login')
+      .send({ username: 'testuser', password: 'password' });
     userToken = loginResponse.body.token;
   });
 
-  it("should place a food order successfully", async () => {
+  it('should place a food order successfully', async () => {
     // Шаг 1: Создаём заказ
     const orderResponse = await request(app)
-      .post("/orders")
-      .set("Authorization", `Bearer ${userToken}`)
+      .post('/orders')
+      .set('Authorization', `Bearer ${userToken}`)
       .send({
         items: [
           { id: 1, quantity: 2 },
           { id: 3, quantity: 1 },
         ],
-        address: "123 Main St",
+        address: '123 Main St',
       })
       .expect(201);
 
-    expect(orderResponse.body.status).toBe("pending");
+    expect(orderResponse.body.status).toBe('pending');
     expect(orderResponse.body.total).toBeDefined();
 
     // Шаг 2: Проверяем статус заказа
     const statusResponse = await request(app)
       .get(`/orders/${orderResponse.body.id}`)
-      .set("Authorization", `Bearer ${userToken}`)
+      .set('Authorization', `Bearer ${userToken}`)
       .expect(200);
 
-    expect(statusResponse.body.status).toBe("pending");
+    expect(statusResponse.body.status).toBe('pending');
   });
 });
 ```
@@ -296,20 +296,20 @@ _Пример: Использование Artillery для нагрузочно�
 ```yaml
 # artillery-config.yml
 config:
-  target: "http://localhost:3000"
+  target: 'http://localhost:3000'
   phases:
     - duration: 60
       arrivalRate: 10 # 10 запросов в секунду
 
 scenarios:
-  - name: "Create and read todos"
+  - name: 'Create and read todos'
     flow:
       - post:
-          url: "/todos"
+          url: '/todos'
           json:
-            title: "Test todo {{ $randomNumber(1, 1000) }}"
+            title: 'Test todo {{ $randomNumber(1, 1000) }}'
       - get:
-          url: "/todos"
+          url: '/todos'
 ```
 
 Для запуска теста используется команда:
@@ -390,25 +390,25 @@ export { add, multiply };
 
 ```js
 // tests/math.test.js
-import { add, multiply } from "../src/math";
+import { add, multiply } from '../src/math';
 
-describe("Math Module", () => {
-  describe("add function", () => {
-    it("should add two numbers correctly", () => {
+describe('Math Module', () => {
+  describe('add function', () => {
+    it('should add two numbers correctly', () => {
       expect(add(2, 3)).toBe(5);
     });
 
-    it("should handle negative numbers", () => {
+    it('should handle negative numbers', () => {
       expect(add(-2, 3)).toBe(1);
     });
   });
 
-  describe("multiply function", () => {
-    it("should multiply two numbers correctly", () => {
+  describe('multiply function', () => {
+    it('should multiply two numbers correctly', () => {
       expect(multiply(2, 3)).toBe(6);
     });
 
-    it("should return 0 when multiplying by 0", () => {
+    it('should return 0 when multiplying by 0', () => {
       expect(multiply(5, 0)).toBe(0);
     });
   });
@@ -453,7 +453,7 @@ expect(value).toBeCloseTo(0.1 + 0.2); // Для чисел с плавающей
 
 // Строки
 expect(str).toMatch(/regex/);
-expect(str).toContain("substring");
+expect(str).toContain('substring');
 
 // Массивы
 expect(array).toContain(element);
@@ -461,7 +461,7 @@ expect(array).toHaveLength(3);
 
 // Функции
 expect(fn).toThrow(Error);
-expect(fn).toThrow("error message");
+expect(fn).toThrow('error message');
 
 // Асинхронный код
 expect(promise).resolves.toBe(value);
@@ -495,39 +495,37 @@ npm install --save-dev supertest
 
 ```js
 // src/app.js
-const express = require("express");
+const express = require('express');
 const app = express();
 
 app.use(express.json());
 
 let todos = [
-  { id: 1, title: "Learn testing", completed: false },
-  { id: 2, title: "Build a project", completed: false },
+  { id: 1, title: 'Learn testing', completed: false },
+  { id: 2, title: 'Build a project', completed: false },
 ];
 
 // GET все задачи
-app.get("/todos", (req, res) => {
+app.get('/todos', (req, res) => {
   res.json(todos);
 });
 
 // GET одну задачу
-app.get("/todos/:id", (req, res) => {
+app.get('/todos/:id', (req, res) => {
   const todo = todos.find((t) => t.id === parseInt(req.params.id));
   if (!todo) {
-    return res.status(404).json({ error: "Todo not found" });
+    return res.status(404).json({ error: 'Todo not found' });
   }
   res.json(todo);
 });
 
 // POST новую задачу
-app.post("/todos", (req, res) => {
+app.post('/todos', (req, res) => {
   const { title } = req.body;
 
   // Валидация
-  if (!title || typeof title !== "string") {
-    return res
-      .status(400)
-      .json({ error: "Title is required and must be string" });
+  if (!title || typeof title !== 'string') {
+    return res.status(400).json({ error: 'Title is required and must be string' });
   }
 
   const newTodo = {
@@ -541,24 +539,24 @@ app.post("/todos", (req, res) => {
 });
 
 // PUT обновить задачу
-app.put("/todos/:id", (req, res) => {
+app.put('/todos/:id', (req, res) => {
   const todo = todos.find((t) => t.id === parseInt(req.params.id));
   if (!todo) {
-    return res.status(404).json({ error: "Todo not found" });
+    return res.status(404).json({ error: 'Todo not found' });
   }
 
   const { title, completed } = req.body;
   if (title) todo.title = title;
-  if (typeof completed === "boolean") todo.completed = completed;
+  if (typeof completed === 'boolean') todo.completed = completed;
 
   res.json(todo);
 });
 
 // DELETE удалить задачу
-app.delete("/todos/:id", (req, res) => {
+app.delete('/todos/:id', (req, res) => {
   const index = todos.findIndex((t) => t.id === parseInt(req.params.id));
   if (index === -1) {
-    return res.status(404).json({ error: "Todo not found" });
+    return res.status(404).json({ error: 'Todo not found' });
   }
 
   const deletedTodo = todos.splice(index, 1);
@@ -573,102 +571,90 @@ export default app;
 ```js
 // tests/todo.test.js
 
-import request from "supertest";
-import app from "../src/app";
+import request from 'supertest';
+import app from '../src/app';
 
-describe("Todo API", () => {
-  describe("GET /todos", () => {
-    it("should return all todos", async () => {
-      const response = await request(app)
-        .get("/todos")
-        .expect("Content-Type", /json/)
-        .expect(200);
+describe('Todo API', () => {
+  describe('GET /todos', () => {
+    it('should return all todos', async () => {
+      const response = await request(app).get('/todos').expect('Content-Type', /json/).expect(200);
 
       expect(Array.isArray(response.body)).toBe(true);
       expect(response.body.length).toBeGreaterThan(0);
     });
   });
 
-  describe("GET /todos/:id", () => {
-    it("should return a specific todo", async () => {
-      const response = await request(app).get("/todos/1").expect(200);
+  describe('GET /todos/:id', () => {
+    it('should return a specific todo', async () => {
+      const response = await request(app).get('/todos/1').expect(200);
 
-      expect(response.body).toHaveProperty("id", 1);
-      expect(response.body).toHaveProperty("title");
-      expect(response.body).toHaveProperty("completed");
+      expect(response.body).toHaveProperty('id', 1);
+      expect(response.body).toHaveProperty('title');
+      expect(response.body).toHaveProperty('completed');
     });
 
-    it("should return 404 for non-existent todo", async () => {
-      await request(app).get("/todos/99999").expect(404);
+    it('should return 404 for non-existent todo', async () => {
+      await request(app).get('/todos/99999').expect(404);
     });
   });
 
-  describe("POST /todos", () => {
-    it("should create a new todo", async () => {
-      const newTodo = { title: "Test new todo" };
+  describe('POST /todos', () => {
+    it('should create a new todo', async () => {
+      const newTodo = { title: 'Test new todo' };
 
       const response = await request(app)
-        .post("/todos")
+        .post('/todos')
         .send(newTodo)
-        .expect("Content-Type", /json/)
+        .expect('Content-Type', /json/)
         .expect(201);
 
-      expect(response.body).toHaveProperty("id");
-      expect(response.body.title).toBe("Test new todo");
+      expect(response.body).toHaveProperty('id');
+      expect(response.body.title).toBe('Test new todo');
       expect(response.body.completed).toBe(false);
     });
 
-    it("should return 400 if title is missing", async () => {
-      const response = await request(app).post("/todos").send({}).expect(400);
+    it('should return 400 if title is missing', async () => {
+      const response = await request(app).post('/todos').send({}).expect(400);
 
-      expect(response.body).toHaveProperty("error");
-      expect(response.body.error).toContain("Title is required");
+      expect(response.body).toHaveProperty('error');
+      expect(response.body.error).toContain('Title is required');
     });
 
-    it("should return 400 if title is not a string", async () => {
-      const response = await request(app)
-        .post("/todos")
-        .send({ title: 123 })
-        .expect(400);
+    it('should return 400 if title is not a string', async () => {
+      const response = await request(app).post('/todos').send({ title: 123 }).expect(400);
 
-      expect(response.body.error).toContain("must be string");
+      expect(response.body.error).toContain('must be string');
     });
   });
 
-  describe("PUT /todos/:id", () => {
-    it("should update todo title", async () => {
+  describe('PUT /todos/:id', () => {
+    it('should update todo title', async () => {
       const response = await request(app)
-        .put("/todos/1")
-        .send({ title: "Updated title" })
+        .put('/todos/1')
+        .send({ title: 'Updated title' })
         .expect(200);
 
-      expect(response.body.title).toBe("Updated title");
+      expect(response.body.title).toBe('Updated title');
     });
 
-    it("should update todo completion status", async () => {
-      const response = await request(app)
-        .put("/todos/1")
-        .send({ completed: true })
-        .expect(200);
+    it('should update todo completion status', async () => {
+      const response = await request(app).put('/todos/1').send({ completed: true }).expect(200);
 
       expect(response.body.completed).toBe(true);
     });
 
-    it("should return 404 for non-existent todo", async () => {
-      await request(app)
-        .put("/todos/99999")
-        .send({ title: "Updated" })
-        .expect(404);
+    it('should return 404 for non-existent todo', async () => {
+      await request(app).put('/todos/99999').send({ title: 'Updated' }).expect(404);
     });
   });
 
-  describe("DELETE /todos/:id", () => {
-    it("should delete a todo", async () => {
-      await request(app).delete("/todos/1").expect(200);
+  describe('DELETE /todos/:id', () => {
+    it('should delete a todo', async () => {
+      await request(app).delete('/todos/1').expect(200);
     });
 
-    it("should return 404 when deleting non-existent todo", async () => {
-      await request(app).delete("/todos/99999").expect(404);
+    it('should return 404 when deleting non-existent todo', async () => {
+      await request(app).delete('/todos/99999').expect(404);
     });
   });
 });
@@ -723,7 +709,7 @@ export default { saveUser };
 ```js
 // src/controllers/userController.js
 
-import UserModel from "../userModel.js";
+import UserModel from '../userModel.js';
 
 export async function registerUser(req, res) {
   try {
@@ -739,21 +725,21 @@ export async function registerUser(req, res) {
 
 ```js
 // src/controllers/userController.test.js
-import * as UserModel from "../userModel.js";
-import { registerUser } from "./userController";
+import * as UserModel from '../userModel.js';
+import { registerUser } from './userController';
 
-jest.mock("../userModel.js");
+jest.mock('../userModel.js');
 
-describe("registerUser controller", () => {
+describe('registerUser controller', () => {
   beforeEach(() => {
     // Очистка всех моков перед каждым тестом
     jest.clearAllMocks();
   });
 
-  it("should save user and return saved user", async () => {
+  it('should save user and return saved user', async () => {
     // Arrange
-    const mockUser = { name: "Alice", email: "alice@example.com" };
-    const mockSaved = { id: "abc123", ...mockUser };
+    const mockUser = { name: 'Alice', email: 'alice@example.com' };
+    const mockSaved = { id: 'abc123', ...mockUser };
 
     // mockResolvedValueOnce используется для имитации успешного сохранения пользователя
     UserModel.saveUser.mockResolvedValueOnce(mockSaved);
@@ -774,17 +760,17 @@ describe("registerUser controller", () => {
     expect(res.json).toHaveBeenCalledWith(mockSaved);
   });
 
-  it("should return 500 if saveUser fails", async () => {
+  it('should return 500 if saveUser fails', async () => {
     // Вместо new Error можно использовать вашу собственную ошибку
-    UserModel.saveUser.mockRejectedValueOnce(new Error("DB Error"));
+    UserModel.saveUser.mockRejectedValueOnce(new Error('DB Error'));
 
-    const req = { body: { name: "Bob", email: "bob@example.com" } };
+    const req = { body: { name: 'Bob', email: 'bob@example.com' } };
     const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
 
     await registerUser(req, res);
 
     expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({ error: "DB Error" });
+    expect(res.json).toHaveBeenCalledWith({ error: 'DB Error' });
   });
 });
 ```
@@ -819,18 +805,18 @@ export default Logger;
 ```js
 // tests/logger.test.js
 
-import Logger from "../src/logger.js";
+import Logger from '../src/logger.js';
 
-describe("Logger", () => {
-  it("should log messages", () => {
+describe('Logger', () => {
+  it('should log messages', () => {
     const logger = new Logger();
-    const infoSpy = jest.spyOn(logger, "info");
+    const infoSpy = jest.spyOn(logger, 'info');
 
-    logger.info("Test message");
+    logger.info('Test message');
 
     // Проверяем, что метод был вызван
     // Был вызван с правильным аргументом и ровно один раз
-    expect(infoSpy).toHaveBeenCalledWith("Test message");
+    expect(infoSpy).toHaveBeenCalledWith('Test message');
     expect(infoSpy).toHaveBeenCalledTimes(1);
 
     // Очищаем spy
@@ -858,24 +844,24 @@ _Test-Driven Development (TDD)_ — это методология разрабо
 _Шаг 1. Red — пишем падающие тесты_
 
 ```js
-import { validateEmail } from "../src/validation.js";
+import { validateEmail } from '../src/validation.js';
 
-describe("Email Validator (TDD)", () => {
-  it("should accept valid emails", () => {
-    expect(validateEmail("user@example.com")).toBe(true);
-    expect(validateEmail("john.doe@company.co.uk")).toBe(true);
+describe('Email Validator (TDD)', () => {
+  it('should accept valid emails', () => {
+    expect(validateEmail('user@example.com')).toBe(true);
+    expect(validateEmail('john.doe@company.co.uk')).toBe(true);
   });
 
-  it("should reject emails without @", () => {
-    expect(validateEmail("userexample.com")).toBe(false);
+  it('should reject emails without @', () => {
+    expect(validateEmail('userexample.com')).toBe(false);
   });
 
-  it("should reject emails without domain", () => {
-    expect(validateEmail("user@")).toBe(false);
+  it('should reject emails without domain', () => {
+    expect(validateEmail('user@')).toBe(false);
   });
 
-  it("should reject empty string", () => {
-    expect(validateEmail("")).toBe(false);
+  it('should reject empty string', () => {
+    expect(validateEmail('')).toBe(false);
   });
 });
 ```
@@ -901,7 +887,7 @@ _Шаг 3. Refactor — улучшаем код_
 ```js
 // src/emailValidator.js
 function validateEmail(email) {
-  if (!email || typeof email !== "string") {
+  if (!email || typeof email !== 'string') {
     return false;
   }
 
@@ -934,234 +920,37 @@ Jest поддерживает BDD стиль через функции `describe
 
 ```js
 // Вместо технического описания...
-describe("add", () => {
-  it("returns sum", () => {
+describe('add', () => {
+  it('returns sum', () => {
     expect(add(2, 2)).toBe(4);
   });
 });
 
 // Пишем так, как бизнес понимает функциональность...
-describe("Todo application", () => {
-  describe("When user creates a new todo", () => {
-    it("should save the todo to the list", async () => {
-      const response = await request(app)
-        .post("/todos")
-        .send({ title: "Buy groceries" });
+describe('Todo application', () => {
+  describe('When user creates a new todo', () => {
+    it('should save the todo to the list', async () => {
+      const response = await request(app).post('/todos').send({ title: 'Buy groceries' });
 
       expect(response.status).toBe(201);
-      expect(response.body.title).toBe("Buy groceries");
+      expect(response.body.title).toBe('Buy groceries');
     });
 
-    it("should return an error if title is missing", async () => {
-      const response = await request(app).post("/todos").send({});
+    it('should return an error if title is missing', async () => {
+      const response = await request(app).post('/todos').send({});
 
       expect(response.status).toBe(400);
-      expect(response.body).toHaveProperty("error");
+      expect(response.body).toHaveProperty('error');
     });
   });
 
-  describe("When user marks a todo as completed", () => {
-    it("should update the todo status", async () => {
-      const response = await request(app)
-        .put("/todos/1")
-        .send({ completed: true });
+  describe('When user marks a todo as completed', () => {
+    it('should update the todo status', async () => {
+      const response = await request(app).put('/todos/1').send({ completed: true });
 
       expect(response.body.completed).toBe(true);
     });
   });
-});
-```
-
-## Лучшие практики тестирования
-
-### Arrange-Act-Assert (AAA) паттерн
-
-_Arrange-Act-Assert (AAA)_ — это паттерн организации тестов, который помогает структурировать тесты для лучшей читаемости и поддержки.
-
-Структурируйте ваши тесты в три фазы:
-
-- `Arrange` — подготовка данных и окружения для теста
-- `Act` — выполнение действия, которое вы хотите протестировать
-- `Assert` — проверка результатов
-
-```js
-describe("Todo API", () => {
-  it("should create and retrieve a todo", async () => {
-    // ARRANGE - подготовка данных и окружения
-    const newTodoData = {
-      title: "Complete the project",
-      description: "Finish backend testing",
-    };
-
-    // ACT - выполнение действия
-    const createResponse = await request(app).post("/todos").send(newTodoData);
-
-    const todoId = createResponse.body.id;
-
-    const getResponse = await request(app).get(`/todos/${todoId}`);
-
-    // ASSERT - проверка результатов
-    expect(createResponse.status).toBe(201);
-    expect(getResponse.body.title).toBe(newTodoData.title);
-    expect(getResponse.body.description).toBe(newTodoData.description);
-  });
-});
-```
-
-### One assertion per test (когда возможно)
-
-_One assertion per test_ — это практика, которая рекомендует ограничивать количество утверждений в одном тесте до одного, когда это возможно. Это помогает сделать тесты более понятными и облегчает диагностику ошибок.
-
-> Хотя это не священный закон, один assert на тест делает сообщения об ошибках чётче.
-
-```js
-// Плохо - слишком много проверок
-it("should create a todo", async () => {
-  const res = await request(app).post("/todos").send({ title: "Test" });
-  expect(res.status).toBe(201);
-  expect(res.body).toHaveProperty("id");
-  expect(res.body.title).toBe("Test");
-  expect(res.body.completed).toBe(false);
-});
-
-// Хорошо - отдельные тесты
-it("should return 201 status", async () => {
-  const res = await request(app).post("/todos").send({ title: "Test" });
-  expect(res.status).toBe(201);
-});
-
-it("should return created todo with correct data", async () => {
-  const res = await request(app).post("/todos").send({ title: "Test" });
-  expect(res.body).toHaveProperty("id");
-  expect(res.body.title).toBe("Test");
-});
-```
-
-### Тестируйте граничные случаи (Edge Cases)
-
-_Граничные случаи_ — это ситуации, которые находятся на границе допустимых значений или условий. Тестирование таких случаев помогает выявить ошибки, которые могут возникнуть в экстремальных ситуациях. Не нужно тестировать только "средние" или все возможные случаи, важно уделять внимание именно граничным.
-
-Например, если у вас есть функция, которая валидирует заголовок задачи, вы должны проверить:
-
-- Пустую строку
-- Максимально длинную строку (например, 255 символов)
-- Нулевое значение
-- Корректную строку
-
-Не нужно тестировать все возможные варианты, достаточно покрыть граничные случаи.
-
-```js
-describe("Input validation", () => {
-  it("should reject empty string", () => {
-    expect(() => validateTodoTitle("")).toThrow();
-  });
-
-  it("should reject null", () => {
-    expect(() => validateTodoTitle(null)).toThrow();
-  });
-
-  it("should reject undefined", () => {
-    expect(() => validateTodoTitle(undefined)).toThrow();
-  });
-
-  it("should reject very long strings", () => {
-    const longString = "a".repeat(1000);
-    expect(() => validateTodoTitle(longString)).toThrow();
-  });
-
-  it("should accept valid strings", () => {
-    expect(validateTodoTitle("Valid todo title")).toBe(true);
-  });
-
-  it("should accept maximum length string", () => {
-    const maxLengthString = "a".repeat(255);
-    expect(validateTodoTitle(maxLengthString)).toBe(true);
-  });
-});
-```
-
-### Используйте Setup и Teardown
-
-_Сетап (Setup)_ и _Тирдаун (Teardown)_ — это процессы подготовки и очистки окружения перед и после выполнения тестов. В Jest для этого используются функции `beforeAll`, `beforeEach`, `afterAll`, `afterEach`. Они полезны для настройки базы данных, очистки данных и других операций, которые должны выполняться до или после тестов.
-
-```js
-describe("Todo API with database", () => {
-  let testTodoId;
-
-  beforeAll(async () => {
-    // Выполняется один раз перед всеми тестами
-    await connectToTestDatabase();
-  });
-
-  beforeEach(async () => {
-    // Выполняется перед каждым тестом
-    testTodoId = await createTestTodo();
-  });
-
-  afterEach(async () => {
-    // Выполняется после каждого теста
-    await cleanupDatabase();
-  });
-
-  afterAll(async () => {
-    // Выполняется один раз после всех тестов
-    await disconnectFromDatabase();
-  });
-
-  it("should retrieve created todo", async () => {
-    const res = await request(app).get(`/todos/${testTodoId}`);
-    expect(res.status).toBe(200);
-  });
-});
-```
-
-### Тестируйте поведение, а не реализацию
-
-_Тестируйте поведение, а не реализацию_ — это практика, которая рекомендует фокусироваться на том, что должен делать код, а не на том, как он это делает. Это помогает сделать тесты менее хрупкими и более устойчивыми к изменениям в коде.
-
-```js
-// Плохо - тестируем внутреннюю реализацию
-it("should use array.filter internally", () => {
-  const spy = jest.spyOn(Array.prototype, "filter");
-  getTodosByStatus("completed");
-  expect(spy).toHaveBeenCalled();
-});
-
-// Хорошо - тестируем поведение
-it("should return only completed todos", async () => {
-  const res = await request(app).get("/todos?status=completed");
-  res.body.forEach((todo) => {
-    expect(todo.completed).toBe(true);
-  });
-});
-```
-
-### Избегайте флаксных тестов
-
-_Флаксные тесты (Flaky Tests)_ — это тесты, которые иногда проходят, а иногда падают без изменений в коде. Они создают недоверие к тестам и усложняют процесс разработки. Это может быть вызвано асинхронностью, зависимостью от внешних сервисов или неправильной настройкой окружения.
-
-Чтобы избежать флаксных тестов:
-
-- Используйте моки для внешних зависимостей
-- Убедитесь, что тесты изолированы друг от друга
-- Избегайте использования случайных данных
-- Убедитесь, что асинхронный код правильно обрабатывается в тестах
-- Регулярно пересматривайте и обновляйте тесты
-
-```js
-// Плохо - зависит от времени
-it("should process todo quickly", async () => {
-  const start = Date.now();
-  await processTodo();
-  const duration = Date.now() - start;
-  expect(duration).toBeLessThan(100); // Может быть слишком строго
-});
-
-// Хорошо - тестируем результат, не время
-it("should process todo successfully", async () => {
-  const result = await processTodo();
-  expect(result).toHaveProperty("processedAt");
-  expect(result.status).toBe("processed");
 });
 ```
 
@@ -1223,7 +1012,7 @@ Jest создаст отчёт в консоли и папке `coverage/`, гд
  * Purpose: Verify that the user registration endpoint works correctly.
  * Dependencies: Express app, UserModel
  */
-describe("User Registration", () => {
+describe('User Registration', () => {
   /**
    * Test: POST /users/register
    * Purpose: Verify successful user registration with valid data
@@ -1231,13 +1020,13 @@ describe("User Registration", () => {
    *  - Returns 201 Created
    *  - Response body contains user ID and username
    */
-  it("should register a new user with valid data", async () => {
+  it('should register a new user with valid data', async () => {
     const response = await request(app)
-      .post("/users/register")
-      .send({ username: "testuser", password: "password123" })
+      .post('/users/register')
+      .send({ username: 'testuser', password: 'password123' })
       .expect(201);
-    expect(response.body).toHaveProperty("id");
-    expect(response.body.username).toBe("testuser");
+    expect(response.body).toHaveProperty('id');
+    expect(response.body.username).toBe('testuser');
   });
 
   /**
@@ -1247,12 +1036,205 @@ describe("User Registration", () => {
    *  - Returns 400 Bad Request
    *  - Response body contains error message
    */
-  it("should return 400 if password is missing", async () => {
+  it('should return 400 if password is missing', async () => {
     const response = await request(app)
-      .post("/users/register")
-      .send({ username: "testuser" })
+      .post('/users/register')
+      .send({ username: 'testuser' })
       .expect(400);
-    expect(response.body).toHaveProperty("error");
+    expect(response.body).toHaveProperty('error');
   });
+});
+```
+
+## Лучшие практики тестирования
+
+### Arrange-Act-Assert (AAA) паттерн
+
+_Arrange-Act-Assert (AAA)_ — это паттерн организации тестов, который помогает структурировать тесты для лучшей читаемости и поддержки.
+
+Структурируйте ваши тесты в три фазы:
+
+- `Arrange` — подготовка данных и окружения для теста
+- `Act` — выполнение действия, которое вы хотите протестировать
+- `Assert` — проверка результатов
+
+```js
+describe('Todo API', () => {
+  it('should create and retrieve a todo', async () => {
+    // ARRANGE - подготовка данных и окружения
+    const newTodoData = {
+      title: 'Complete the project',
+      description: 'Finish backend testing',
+    };
+
+    // ACT - выполнение действия
+    const createResponse = await request(app).post('/todos').send(newTodoData);
+
+    const todoId = createResponse.body.id;
+
+    const getResponse = await request(app).get(`/todos/${todoId}`);
+
+    // ASSERT - проверка результатов
+    expect(createResponse.status).toBe(201);
+    expect(getResponse.body.title).toBe(newTodoData.title);
+    expect(getResponse.body.description).toBe(newTodoData.description);
+  });
+});
+```
+
+### One assertion per test (когда возможно)
+
+_One assertion per test_ — это практика, которая рекомендует ограничивать количество утверждений в одном тесте до одного, когда это возможно. Это помогает сделать тесты более понятными и облегчает диагностику ошибок.
+
+> Хотя это не священный закон, один assert на тест делает сообщения об ошибках чётче.
+
+```js
+// Плохо - слишком много проверок
+it('should create a todo', async () => {
+  const res = await request(app).post('/todos').send({ title: 'Test' });
+  expect(res.status).toBe(201);
+  expect(res.body).toHaveProperty('id');
+  expect(res.body.title).toBe('Test');
+  expect(res.body.completed).toBe(false);
+});
+
+// Хорошо - отдельные тесты
+it('should return 201 status', async () => {
+  const res = await request(app).post('/todos').send({ title: 'Test' });
+  expect(res.status).toBe(201);
+});
+
+it('should return created todo with correct data', async () => {
+  const res = await request(app).post('/todos').send({ title: 'Test' });
+  expect(res.body).toHaveProperty('id');
+  expect(res.body.title).toBe('Test');
+});
+```
+
+### Тестируйте граничные случаи (Edge Cases)
+
+_Граничные случаи_ — это ситуации, которые находятся на границе допустимых значений или условий. Тестирование таких случаев помогает выявить ошибки, которые могут возникнуть в экстремальных ситуациях. Не нужно тестировать только "средние" или все возможные случаи, важно уделять внимание именно граничным.
+
+Например, если у вас есть функция, которая валидирует заголовок задачи, вы должны проверить:
+
+- Пустую строку
+- Максимально длинную строку (например, 255 символов)
+- Нулевое значение
+- Корректную строку
+
+Не нужно тестировать все возможные варианты, достаточно покрыть граничные случаи.
+
+```js
+describe('Input validation', () => {
+  it('should reject empty string', () => {
+    expect(() => validateTodoTitle('')).toThrow();
+  });
+
+  it('should reject null', () => {
+    expect(() => validateTodoTitle(null)).toThrow();
+  });
+
+  it('should reject undefined', () => {
+    expect(() => validateTodoTitle(undefined)).toThrow();
+  });
+
+  it('should reject very long strings', () => {
+    const longString = 'a'.repeat(1000);
+    expect(() => validateTodoTitle(longString)).toThrow();
+  });
+
+  it('should accept valid strings', () => {
+    expect(validateTodoTitle('Valid todo title')).toBe(true);
+  });
+
+  it('should accept maximum length string', () => {
+    const maxLengthString = 'a'.repeat(255);
+    expect(validateTodoTitle(maxLengthString)).toBe(true);
+  });
+});
+```
+
+### Используйте Setup и Teardown
+
+_Сетап (Setup)_ и _Тирдаун (Teardown)_ — это процессы подготовки и очистки окружения перед и после выполнения тестов. В Jest для этого используются функции `beforeAll`, `beforeEach`, `afterAll`, `afterEach`. Они полезны для настройки базы данных, очистки данных и других операций, которые должны выполняться до или после тестов.
+
+```js
+describe('Todo API with database', () => {
+  let testTodoId;
+
+  beforeAll(async () => {
+    // Выполняется один раз перед всеми тестами
+    await connectToTestDatabase();
+  });
+
+  beforeEach(async () => {
+    // Выполняется перед каждым тестом
+    testTodoId = await createTestTodo();
+  });
+
+  afterEach(async () => {
+    // Выполняется после каждого теста
+    await cleanupDatabase();
+  });
+
+  afterAll(async () => {
+    // Выполняется один раз после всех тестов
+    await disconnectFromDatabase();
+  });
+
+  it('should retrieve created todo', async () => {
+    const res = await request(app).get(`/todos/${testTodoId}`);
+    expect(res.status).toBe(200);
+  });
+});
+```
+
+### Тестируйте поведение, а не реализацию
+
+_Тестируйте поведение, а не реализацию_ — это практика, которая рекомендует фокусироваться на том, что должен делать код, а не на том, как он это делает. Это помогает сделать тесты менее хрупкими и более устойчивыми к изменениям в коде.
+
+```js
+// Плохо - тестируем внутреннюю реализацию
+it('should use array.filter internally', () => {
+  const spy = jest.spyOn(Array.prototype, 'filter');
+  getTodosByStatus('completed');
+  expect(spy).toHaveBeenCalled();
+});
+
+// Хорошо - тестируем поведение
+it('should return only completed todos', async () => {
+  const res = await request(app).get('/todos?status=completed');
+  res.body.forEach((todo) => {
+    expect(todo.completed).toBe(true);
+  });
+});
+```
+
+### Избегайте флаксных тестов
+
+_Флаксные тесты (Flaky Tests)_ — это тесты, которые иногда проходят, а иногда падают без изменений в коде. Они создают недоверие к тестам и усложняют процесс разработки. Это может быть вызвано асинхронностью, зависимостью от внешних сервисов или неправильной настройкой окружения.
+
+Чтобы избежать флаксных тестов:
+
+- Используйте моки для внешних зависимостей
+- Убедитесь, что тесты изолированы друг от друга
+- Избегайте использования случайных данных
+- Убедитесь, что асинхронный код правильно обрабатывается в тестах
+- Регулярно пересматривайте и обновляйте тесты
+
+```js
+// Плохо - зависит от времени
+it('should process todo quickly', async () => {
+  const start = Date.now();
+  await processTodo();
+  const duration = Date.now() - start;
+  expect(duration).toBeLessThan(100); // Может быть слишком строго
+});
+
+// Хорошо - тестируем результат, не время
+it('should process todo successfully', async () => {
+  const result = await processTodo();
+  expect(result).toHaveProperty('processedAt');
+  expect(result.status).toBe('processed');
 });
 ```
